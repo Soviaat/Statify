@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "statify",
+	"version": "${version}",
+	"name": "Statify",
+	"description": "This mod gets all the stats of the player in the current world and uploads it into Google Sheets.",
+	"authors": [
+		"Soviaat"
+	],
+	"contact": {
+		"discord": "https://discordapp.com/users/708012757726920784"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/statify/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.soviaat.Statify"
+		],
+		"fabric-datagen": [
+			"dev.soviaat.StatifyDataGenerator"
+		],
+		"client": [
+			"dev.soviaat.StatifyClient"
+		]
+	},
+	"mixins": [
+		"statify.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.5",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
