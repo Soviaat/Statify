@@ -32,10 +32,11 @@ public class FileManagement {
             Stat<Identifier> stat = Stats.CUSTOM.getOrCreateStat(entry.getValue());
             int value = statHandler.getStat(stat);
             String statName = entry.getValue().toString();
-            statsBuilder.append(statName).append(": ").append(value).append("\n");
+
+            statsBuilder.append(statName).append(";").append(value).append("\n");
         }
 
-        Path statFilePath = Paths.get("Statify", worldName, "statify_stats.txt");
+        Path statFilePath = Paths.get("Statify", worldName, "statify_stats.csv");
         File file = statFilePath.toFile();
         File parentDir = file.getParentFile();
 
@@ -50,11 +51,9 @@ public class FileManagement {
         }
 
         try (FileWriter writer = new FileWriter(file)) {
-            writer.write("Statistics for " + player.getName().getString() + " in " + worldName + "\n");
             writer.write(statsBuilder.toString());
-            LOGGER.info("Written stats to file: {}", file.getAbsolutePath());
         } catch (IOException e) {
-            LOGGER.error("Failed to write stats to file", e);
+            LOGGER.error("Failed to write stats to CSV file", e);
         }
     }
 

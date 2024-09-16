@@ -13,9 +13,13 @@ import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
 
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import static dev.soviaat.Common.*;
 import static dev.soviaat.Common.worldStatusMap;
 import static dev.soviaat.FileManagement.*;
+import static dev.soviaat.utils.GoogleSheetsUtil.UpdateStatsFromCSV;
 
 public class Statify implements ModInitializer {
 
@@ -41,6 +45,13 @@ public class Statify implements ModInitializer {
 				lastUpdateTime = currentTime;
 				for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
 					writeStatsToFile(player, worldName);
+				}
+
+				String csvFilePath = "Statify/" + worldName + "/statify_stats.csv";
+				try {
+					UpdateStatsFromCSV(csvFilePath);
+				} catch (IOException | GeneralSecurityException e) {
+					LOGGER.error("Failed to upload CSV data to Google Spreadsheets", e);
 				}
 			}
 		});
