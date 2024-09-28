@@ -144,7 +144,6 @@ public class Statify implements ModInitializer {
 				)
 		);
 	}
-
 }
 
 
