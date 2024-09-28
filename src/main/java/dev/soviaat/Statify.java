@@ -42,7 +42,7 @@ public class Statify implements ModInitializer {
 
 			long currentTime = world.getTime();
 
-			if (currentTime - lastUpdateTime > 600) {
+			if (currentTime - lastUpdateTime > 2400) {
 				lastUpdateTime = currentTime;
 				for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
 					writeStatsToFile(player, worldName);
