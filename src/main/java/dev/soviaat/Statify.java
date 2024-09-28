@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 

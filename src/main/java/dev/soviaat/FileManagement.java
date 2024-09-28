@@ -1,6 +1,7 @@
 package dev.soviaat;
 
 import com.google.common.reflect.TypeToken;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
