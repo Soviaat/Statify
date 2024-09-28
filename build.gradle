@@ -1,6 +1,7 @@
 plugins {
 	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
+	id 'com.github.johnrengelman.shadow' version '8.0.0'
 }
 
 version = project.mod_version
@@ -16,10 +17,37 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	mavenCentral()
+	google()
+}
+
+configurations {
+	shadowImplementation {
+	canBeResolved = true
+	canBeConsumed = false
+	extendsFrom implementation
+	}
+}
+
+shadowJar {
+	archiveClassifier.set('dev-shadow')
+	configurations = [project.configurations.shadowImplementation]
+	mergeServiceFiles()
 }
 
 fabricApi {
 	configureDataGeneration()
+}
+
+tasks {
+	remapJar {
+		inputFile.set(shadowJar.archiveFile)
+		archiveClassifier.set('')
+	}
+
+	build {
+		dependsOn(remapJar)
+	}
 }
 
 dependencies {

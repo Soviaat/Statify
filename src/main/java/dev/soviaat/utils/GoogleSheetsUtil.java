@@ -23,7 +23,7 @@ public class GoogleSheetsUtil {
     private static final String APP_NAME = "Statify";
     private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static Sheets sheetService;
-    private static final String SPREADSHEET_ID = "1vsvAZzoBb8B-MSSwOxaSc8EYLD8OwFKaieNGdN2kqoA";
+    private static final String SPREADSHEET_ID = "1voa-kqrSQ-abclwb6eb7fASu_XGXbVcK4AOjN2BujQU";
 
     private static GoogleCredentials authorize() throws IOException, GeneralSecurityException {
         InputStream credStream = Statify.class.getClassLoader().getResourceAsStream("config/statify/credentials.json");
@@ -44,9 +44,8 @@ public class GoogleSheetsUtil {
         return sheetService;
     }
 
-    public static void UpdateStatsFromCSV(String csvFilePath) throws GeneralSecurityException, IOException {
+    public static void UpdateStatsFromCSV(String csvFilePath, String range) throws GeneralSecurityException, IOException {
         try {
-            // Read CSV file and parse content
             List<List<Object>> csvData = ParseCSV(csvFilePath);
 
             if (csvData.isEmpty()) {
@@ -54,12 +53,11 @@ public class GoogleSheetsUtil {
                 return;
             }
 
-            // Upload data to Google Sheets
             Sheets sheetService = getSheetService();
-            ValueRange body = new ValueRange().setValues(csvData); // This assumes all the CSV rows are to be uploaded
+            ValueRange body = new ValueRange().setValues(csvData);
 
             sheetService.spreadsheets().values()
-                    .update(SPREADSHEET_ID, "Stats!A1", body)
+                    .update(SPREADSHEET_ID, range, body)
                     .setValueInputOption("RAW")
                     .execute();
 
