@@ -58,4 +58,8 @@
 ![URL Bar](https://cdn.discordapp.com/attachments/961185822730764298/1289926305860550821/image.png?ex=66fa98fc&is=66f9477c&hm=72f305a77030dc77ed4b9a2376456de715c3f0bc4d204c9c9a2c66876bdb6f70&)
 
 4. Now, get in-game. And type the command `/statify sheetid [ID]`. (Replace [ID] with your Sheet's ID) and press Enter.
+
+<h3>After enabling the mod with <code>/statify enable</code> and making sure the upload is on with <code>/statify upload_on</code> there is a 2 minute wait time.</h6>
+<h5>So before you think the mod does not work, it does, you just have to wait 2 minutes after enabling it to see your stats appearing.</h5>
+
 </div>
