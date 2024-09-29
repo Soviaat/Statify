@@ -48,6 +48,9 @@
       <img alt="Step 1 - Paste into textbox | Step 2 - Permission: Editor | Step 3: Press 'Share'" src="https://cdn.discordapp.com/attachments/961185822730764298/1289935026385063976/image.png?ex=66faa11c&is=66f94f9c&hm=6997ef72ed09829bcafc1d49d266a7057908ccc84c1ee83338fa3e1ed4306b5c&">
     </td>
   </tr>
+  <tr>
+    <td colspan=2>Don't worry, this Worker Account will not be able to access any of your personal information, and does not inject any harmful code into your Sheets. Only your statistics will be uploaded.</td>
+  </tr>
 </table>
 
 4. After you gave permission to the Worker Account for your sheet, you'll need to copy the Sheet's ID from the URL bar at the top. This ID is found in between the `spreadsheets/d/` and `/edit` section of the URL.
