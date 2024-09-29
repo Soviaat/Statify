@@ -16,7 +16,7 @@
 
 <h1>Tutorial on: How to set up Google Sheets</h1>
 
-1. First of all, we've made a boilerplate [Google Sheet](https://docs.google.com/spreadsheets/d/1nGZAkqGMEmltLfvBtCr4GKUFrnvnlBlJlPddw4Wj6sc/edit?usp=sharing) for y'all that you can easily make a copy of and rename it.
+1. First of all, Kendiii made a boilerplate [Google Sheet](https://docs.google.com/spreadsheets/d/1nGZAkqGMEmltLfvBtCr4GKUFrnvnlBlJlPddw4Wj6sc/edit?usp=sharing) for y'all that you can easily make a copy of and rename it.
 <div align="center">
 
 <img alt="File - Make a copy" src="https://cdn.discordapp.com/attachments/961185822730764298/1289921706181525606/image.png?ex=66fa94b4&is=66f94334&hm=69830e631ea64a0fce2106c4982f86f7277b27723b8bb9dc039abf861dfa73e8&" width=300>
