@@ -33,7 +33,7 @@
 
 <table>
   <tr>
-    <td>Step 1: On the top right, press on "Share"</td>
+    <td>Step 1: On the top right, click on "Share"</td>
     <td>
       <img alt="Share button on the top right" src="https://cdn.discordapp.com/attachments/961185822730764298/1289928296565575701/image.png?ex=66fa9ad7&is=66f94957&hm=e3c8081433e047df58be652d449da47ebba6762b686dc16bc8f80a64da62a758&">
     </td>
@@ -42,10 +42,10 @@
     <td>
       Step 2: Paste the Worker Account's e-mail into the textbox and set the permission level to <b>Editor</b><br>
       (Worker account: <code>statify@skilled-boulder-374617.iam.gserviceaccount.com</code>)<br>
-      Then press <kbd width=20>Share</kbd>
+      Then click <kbd width=20>Share</kbd>
     </td>
     <td>
-      <img alt="Step 1 - Paste into textbox | Step 2 - Permission: Editor | Step 3: Press 'Share'" src="https://cdn.discordapp.com/attachments/961185822730764298/1289935026385063976/image.png?ex=66faa11c&is=66f94f9c&hm=6997ef72ed09829bcafc1d49d266a7057908ccc84c1ee83338fa3e1ed4306b5c&">
+      <img alt="Step 1 - Paste into textbox | Step 2 - Permission: Editor | Step 3: Click 'Share'" src="https://cdn.discordapp.com/attachments/961185822730764298/1289935026385063976/image.png?ex=66faa11c&is=66f94f9c&hm=6997ef72ed09829bcafc1d49d266a7057908ccc84c1ee83338fa3e1ed4306b5c&">
     </td>
   </tr>
   <tr>
