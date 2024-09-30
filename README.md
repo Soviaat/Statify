@@ -88,7 +88,7 @@ After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type i
 
 4. Now, get in-game. And type the command `/statify sheetid [ID]`. (Replace [ID] with your Sheet's ID) and press Enter.
 
-<h3>After enabling the mod with <code>/statify enable</code> and making sure the upload is on with <code>/statify upload_on</code> there is a 2 minute wait time.</h6>
+<h3>After enabling the mod with <code>/statify enable</code> and making sure the upload is on with <code>/statify upload on</code> there is a 2 minute wait time.</h6>
 <h5>So before you think the mod does not work, it does, you just have to wait 2 minutes after enabling it to see your stats appearing.</h5>
 
 </div>
