@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class Common {
     public static final String MOD_ID = "statify";
@@ -26,23 +27,25 @@ public class Common {
     }
 
     public static void putDayCount(int dayCount) {
-        Common.dayCount = dayCount;
+        CompletableFuture.runAsync(()-> {
+            Common.dayCount = dayCount;
+        });
     }
 
     public static int getDayCount(String world) {
-        int days = 0;
-        Path path = Paths.get("Statify", world, "days.csv");
-        File file = path.toFile();
-        File parentD = file.getParentFile();
+            int days = 0;
+            Path path = Paths.get("Statify", world, "days.csv");
+            File file = path.toFile();
+            File parentD = file.getParentFile();
 
-        if(parentD != null) {
-            try {
-                days = Integer.parseInt(Files.readString(path));
-            } catch (IOException e) {
-                LOGGER.error("Failed to read days from CSV file", e);
+            if(parentD != null) {
+                try {
+                    days = Integer.parseInt(Files.readString(path));
+                } catch (IOException e) {
+                    LOGGER.error("Failed to read days from CSV file", e);
+                }
             }
-        }
-        return days;
+            return days;
     }
 
     public static String getDayCountAsString() {

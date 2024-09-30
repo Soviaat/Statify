@@ -41,6 +41,12 @@ fabricApi {
 
 tasks {
 	remapJar {
+		archiveBaseName.set(project.archives_base_name)
+
+		// Dynamically set the version using properties from gradle.properties
+		archiveVersion.set("${project.minecraft_version}-${project.loader_version}-fabric")
+
+
 		inputFile.set(shadowJar.archiveFile)
 		archiveClassifier.set('')
 	}
@@ -100,9 +106,9 @@ java {
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.base.archivesName.get()}"}
-	}
+	setArchiveBaseName(project.archives_base_name)
+	setArchiveVersion("${project.minecraft_version}-${project.loader_version}-fabric")
+	from("LICENSE")
 }
 
 // configure the maven publication
