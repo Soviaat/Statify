@@ -27,7 +27,10 @@
   To install this mod, press on the [View Versions](https://github.com/Soviaat/Statify#versions) button on the top of this README file.
   </li>
   <li>Click on the version you need for your instance of Minecraft, then click on the .jar file to download it.</li>
-  <li>After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type in this ` %appdata%/.minecraft/mods ` and press enter. You should be welcomed by your mods folder.</li>
+  <li>
+    
+After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type in this ` %appdata%/.minecraft/mods ` and press enter. You should be welcomed by your mods folder.
+  </li>
   <li>Put the .jar file into your mods folder.</li>
   <li>You should be good to go! :D</li>
 </ol>
