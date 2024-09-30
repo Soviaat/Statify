@@ -2,15 +2,38 @@
 
 ![Static Badge](https://img.shields.io/badge/Fabric->=0.16.5-1f6feb?style=flat-square&link=https://fabricmc.net/use/installer/)
 ![Static Badge](https://img.shields.io/badge/Minecraft-1.21.1-green?style=flat-square&logo=Minetest&logoColor=white)
+</div>
+<div align=center id="versions">
   
+  [![Static Badge](https://img.shields.io/badge/View_Versions-red?style=flat-square)](https://github.com/Soviaat/Statify/releases/)
+
 </div>
 
+<h1 align=center width=20>Statify</h1>
 
-<h1 align=center>Statify</h1>
+<div align=center><img src="https://cdn.discordapp.com/attachments/961185822730764298/1290378622129143859/rollicon-transparent.gif?ex=66fc3e3d&is=66faecbd&hm=9229bbd6634994e9433a3cac6860be69e5fce20dba2fee1805bed4b96cf59971&" width=300></div>
+
 <img alt="Huge thanks to Kendiii for making this mod more colorful:)" src="https://cdn.discordapp.com/attachments/961185822730764298/1289953406261268641/image.png?ex=66fab23a&is=66f960ba&hm=86da77a02809a6695092c578b004832ac075000ec0d9237fcd46e3ed5c76706c&">
 
 <p align=center>This mod gets all the statistics from your Minecraft World every 2 minutes and uploads it into Google Sheets.</p>
 
+<div id="usage">
+
+<h2>Tutorial on: How to install</h2>
+
+<ol align=justify>
+  <li>To install this mod, press on the [View Versions](https://github.com/Soviaat/Statify/README.md#versions) button on the top of this README file.</li>
+  <li>Click on the version you need for your instance of Minecraft, then click on the .jar file to download it.</li>
+  <li>After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type in this ` %appdata%/.minecraft/mods ` and press enter. You should be welcomed by your mods folder.</li>
+  <li>Put the .jar file into your mods folder.</li>
+  <li>You should be good to go! :D</li>
+</ol>
+   
+`
+  Keep in mind that the version you download must be compatible with the
+  Fabric and Minecraft versions you have installed in your mods folder, this is always specified under every release. 
+`  
+</div>
 
 <div id="setup">
 
