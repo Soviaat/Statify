@@ -1,6 +1,6 @@
 <div align=center>
 
-![Static Badge](https://img.shields.io/badge/Fabric->=0.16.5-1f6feb?style=flat-square&link=https://fabricmc.net/use/installer/)
+[![Static Badge](https://img.shields.io/badge/Fabric->=0.16.5-1f6feb?style=flat-square)](https://fabricmc.net/use/installer/)
 ![Static Badge](https://img.shields.io/badge/Minecraft-1.21.1-green?style=flat-square&logo=Minetest&logoColor=white)
 </div>
 <div align=center id="versions">
