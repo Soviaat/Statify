@@ -21,8 +21,8 @@ public class UploadManager {
         loadCurrentUploadWorld();
     }
 
-    private void loadCurrentUploadWorld() {
-        CompletableFuture.runAsync(() -> {
+    private CompletableFuture<Void> loadCurrentUploadWorld() {
+        return CompletableFuture.runAsync(() -> {
             File configFile = new File(UPLOAD_FILE);
 
             if(configFile.exists()) {
@@ -35,6 +35,10 @@ public class UploadManager {
                 }
             } else {
                 currentUploadWorld = null;
+            }
+        }).whenComplete((result, ex) -> {
+            if(ex != null) {
+                LOGGER.error("Failed to load current upload world", ex);
             }
         });
     }
@@ -55,8 +59,8 @@ public class UploadManager {
         });
     }
 
-    public String getUploadWorld() {
-        return currentUploadWorld;
+    public CompletableFuture<String> getUploadWorld() {
+        return loadCurrentUploadWorld().thenApply(ignored -> currentUploadWorld);
     }
 
     public void setUploadWorld(String worldName) {

@@ -10,6 +10,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.concurrent.CompletableFuture;
 
 import static dev.soviaat.Common.*;
 import static dev.soviaat.Common.worldStatusMap;
@@ -35,34 +36,35 @@ public class Statify implements ModInitializer {
 				String worldName = world.getServer().getSaveProperties().getLevelName();
 				if(!"on".equals(worldStatusMap.getOrDefault(worldName, "off"))) return;
 
-				long currentTime = world.getTime();
+				long currentTime = world.getTimeOfDay();
 
-				if (currentTime - lastUpdateTime > 2400) {
+				if (currentTime - lastUpdateTime >= 2400) {
 					lastUpdateTime = currentTime;
+
 					for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
 						writeStatsToFile(player, worldName);
 					}
 
 					if(uploadManager.isWorldUploading(worldName)) {
-						String dayFilePath = "Statify/" + worldName + "/days.csv";
-						if(getDayCount(worldName) < world.getTimeOfDay() / 24000L) {
-							putDayCount((int) (world.getTimeOfDay() / 24000L));
-							writeDaysToFile(worldName, getDayCountAsString());
-							try {
-								UpdateStatsFromCSV(dayFilePath, "Raw_Data!I3", worldName);
-							} catch (IOException | GeneralSecurityException e) {
-								LOGGER.error("Failed to upload CSV days to Google Spreadsheets", e);
-							}
-						}
-
-						String csvFilePath = "Statify/" + worldName + "/statify_stats.csv";
-						try {
-							UpdateStatsFromCSV(csvFilePath, "Raw_Data!A1", worldName);
-						} catch (IOException | GeneralSecurityException e) {
-							LOGGER.error("Failed to upload CSV data to Google Spreadsheets", e);
-						}
+						uploadToSheetsAsync(worldName, world.getTimeOfDay());
 					}
 				}
+		});
+	}
+	private void uploadToSheetsAsync(String worldName, long timeOfDay) {
+		CompletableFuture.runAsync(() -> {
+			try {
+				String dayFilePath = "Statify/" + worldName + "/days.csv";
+				if (getDayCount(worldName) < timeOfDay / 24000L) {
+					putDayCount((int) (timeOfDay / 24000L));
+					writeDaysToFile(worldName, getDayCountAsString());
+					UpdateStatsFromCSV(dayFilePath, "Raw_Data!I3", worldName);
+				}
+				String csvFilePath = "Statify/" + worldName + "/statify_stats.csv";
+				UpdateStatsFromCSV(csvFilePath, "Raw_Data!A1", worldName);
+			} catch (IOException | GeneralSecurityException e) {
+				LOGGER.error("Failed to upload CSV data to Google Spreadsheets", e);
+			}
 		});
 	}
 }

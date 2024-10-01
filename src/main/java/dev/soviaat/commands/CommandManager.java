@@ -12,6 +12,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.concurrent.CompletableFuture;
+
 import static dev.soviaat.Common.*;
 import static dev.soviaat.FileManagement.*;
 
@@ -102,7 +104,7 @@ public class CommandManager {
             return 1;
         }
 
-        String currentUploadWorld = uploadManager.getUploadWorld();
+        CompletableFuture<String> currentUploadWorld = uploadManager.getUploadWorld();
 
         if (currentUploadWorld != null && currentUploadWorld.equals(worldName)) {
             ctx.getSource().sendMessage(Text.of("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r Upload is already §benabled§r for this world."));
@@ -114,6 +116,9 @@ public class CommandManager {
             uploadManager.setUploadWorld(worldName);
             ctx.getSource().sendMessage(Text.of("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r Upload has been §benabled§r for this world. (" + worldName + ")"));
         }
+
+
+        ctx.getSource().sendFeedback(() -> Text.of("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r §cTo achieve proper functionality, §lplease restart Minecraft.§r"), false);
 
         return 1;
     }
