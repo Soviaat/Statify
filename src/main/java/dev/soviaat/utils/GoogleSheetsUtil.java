@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static com.google.auth.oauth2.GoogleCredentials.fromStream;
-import static com.mojang.text2speech.Narrator.LOGGER;
+import static dev.soviaat.Common.LOGGER;
 
 public class GoogleSheetsUtil {
     private static final String APP_NAME = "Statify";

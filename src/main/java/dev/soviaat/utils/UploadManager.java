@@ -9,7 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static com.mojang.text2speech.Narrator.LOGGER;
+import static dev.soviaat.Common.LOGGER;
 
 public class UploadManager {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();

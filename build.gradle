@@ -44,7 +44,7 @@ tasks {
 		archiveBaseName.set(project.archives_base_name)
 
 		// Dynamically set the version using properties from gradle.properties
-		archiveVersion.set("${project.minecraft_version}-${project.loader_version}-fabric")
+		archiveVersion.set("${project.mod_version}-${project.minecraft_version}-fabric")
 
 
 		inputFile.set(shadowJar.archiveFile)
