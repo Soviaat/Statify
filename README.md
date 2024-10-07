@@ -1,6 +1,6 @@
 <div align=center>
 
-![Static Badge](https://img.shields.io/badge/Fabric->=0.16.5-1f6feb?style=flat-square&link=https://fabricmc.net/use/installer/)
+[![Static Badge](https://img.shields.io/badge/Fabric->=0.16.5-1f6feb?style=flat-square)](https://fabricmc.net/use/installer/)
 ![Static Badge](https://img.shields.io/badge/Minecraft-1.21.1-green?style=flat-square&logo=Minetest&logoColor=white)
 </div>
 <div align=center id="versions">
@@ -11,9 +11,9 @@
 
 <h1 align=center width=20>Statify</h1>
 
-<div align=center><img src="https://cdn.discordapp.com/attachments/961185822730764298/1290378622129143859/rollicon-transparent.gif?ex=66fc3e3d&is=66faecbd&hm=9229bbd6634994e9433a3cac6860be69e5fce20dba2fee1805bed4b96cf59971&" width=300></div>
+<div align=center><img src="https://github.com/Soviaat/Statify/blob/master/imgs/rollicon-transparent.gif" width=300></div>
 
-<img alt="Huge thanks to Kendiii for making this mod more colorful:)" src="https://cdn.discordapp.com/attachments/961185822730764298/1289953406261268641/image.png?ex=66fab23a&is=66f960ba&hm=86da77a02809a6695092c578b004832ac075000ec0d9237fcd46e3ed5c76706c&">
+<img alt="Huge thanks to Kendiii for making this mod more colorful:)" src="https://github.com/Soviaat/Statify/blob/master/imgs/thankskendi.png">
 
 <p align=center>This mod gets all the statistics from your Minecraft World every 2 minutes and uploads it into Google Sheets.</p>
 
@@ -48,7 +48,7 @@ After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type i
 1. First of all, Kendiii made a boilerplate [Google Sheet](https://docs.google.com/spreadsheets/d/1nGZAkqGMEmltLfvBtCr4GKUFrnvnlBlJlPddw4Wj6sc/edit?usp=sharing) for y'all that you can easily make a copy of and rename it.
 <div align="center">
 
-<img alt="File - Make a copy" src="https://cdn.discordapp.com/attachments/961185822730764298/1289921706181525606/image.png?ex=66fa94b4&is=66f94334&hm=69830e631ea64a0fce2106c4982f86f7277b27723b8bb9dc039abf861dfa73e8&" width=300>
+<img alt="File - Make a copy" src="https://github.com/Soviaat/Statify/blob/master/imgs/makeacopy.png" width=300>
   
 </div>
 
@@ -56,7 +56,7 @@ After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type i
 
 2. Then, you should be able to see your copy of this Boilerplate Sheet. On the top, you will see a yellow ribbon, click "Allow access". This will allow you to see the pictures of the items on the Statistics and Analysis sheets. 
 
-<img alt="Yellow warning ribbon" src="https://cdn.discordapp.com/attachments/961185822730764298/1289925474868400128/image.png?ex=66fa9836&is=66f946b6&hm=384a6d74e54410d8a0fe2e599bd5757dff580422f9215c0eeb4f8692ac3d95aa&">
+<img alt="Yellow warning ribbon" src="https://github.com/Soviaat/Statify/blob/master/imgs/yellowribbon.png">
 
 3. After you pressed "Allow access", you need to give permission to the Mod's Worker Account.
 
@@ -64,7 +64,7 @@ After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type i
   <tr>
     <td>Step 1: On the top right, click on "Share"</td>
     <td>
-      <img alt="Share button on the top right" src="https://cdn.discordapp.com/attachments/961185822730764298/1289928296565575701/image.png?ex=66fa9ad7&is=66f94957&hm=e3c8081433e047df58be652d449da47ebba6762b686dc16bc8f80a64da62a758&">
+      <img alt="Share button on the top right" src="https://github.com/Soviaat/Statify/blob/master/imgs/share.png">
     </td>
   </tr>
   <tr>
@@ -74,7 +74,7 @@ After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type i
       Then click <kbd width=20>Share</kbd>
     </td>
     <td>
-      <img alt="Step 1 - Paste into textbox | Step 2 - Permission: Editor | Step 3: Click 'Share'" src="https://cdn.discordapp.com/attachments/961185822730764298/1289935026385063976/image.png?ex=66faa11c&is=66f94f9c&hm=6997ef72ed09829bcafc1d49d266a7057908ccc84c1ee83338fa3e1ed4306b5c&">
+      <img alt="Step 1 - Paste into textbox | Step 2 - Permission: Editor | Step 3: Click 'Share'" src="https://github.com/Soviaat/Statify/blob/master/imgs/editoraccess.png">
     </td>
   </tr>
   <tr>
@@ -84,11 +84,11 @@ After you downloaded the .jar file, press <kbd>Win</kbd>+<kbd>R</kbd> and type i
 
 4. After you gave permission to the Worker Account for your sheet, you'll need to copy the Sheet's ID from the URL bar at the top. This ID is found in between the `spreadsheets/d/` and `/edit` section of the URL.
 
-![URL Bar](https://cdn.discordapp.com/attachments/961185822730764298/1289926305860550821/image.png?ex=66fa98fc&is=66f9477c&hm=72f305a77030dc77ed4b9a2376456de715c3f0bc4d204c9c9a2c66876bdb6f70&)
+![URL Bar](https://github.com/Soviaat/Statify/blob/master/imgs/sheetid.png)
 
 4. Now, get in-game. And type the command `/statify sheetid [ID]`. (Replace [ID] with your Sheet's ID) and press Enter.
 
-<h3>After enabling the mod with <code>/statify enable</code> and making sure the upload is on with <code>/statify upload on</code> there is a 2 minute wait time.</h6>
-<h5>So before you think the mod does not work, it does, you just have to wait 2 minutes after enabling it to see your stats appearing.</h5>
+<h3>After enabling the mod with <code>/statify enable</code> make sure the upload is on with <code>/statify upload on</code>, then you'll need to restart Minecraft.</h6>
+<h5>So before you think the mod does not work, it does, you just have restart the game after enabling it to see your stats appearing.</h5>
 
 </div>
