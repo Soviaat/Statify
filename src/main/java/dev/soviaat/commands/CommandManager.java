@@ -1,5 +1,7 @@
 package dev.soviaat.commands;
 
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.ValueRange;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -16,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static dev.soviaat.Common.*;
 import static dev.soviaat.FileManagement.*;
+import static dev.soviaat.utils.ResponseBuilder.*;
+import static net.minecraft.text.ClickEvent.Action.SUGGEST_COMMAND;
 
 public class CommandManager {
     private static UploadManager uploadManager;
@@ -89,8 +93,8 @@ public class CommandManager {
         MutableText noSheetIdFound = Text.literal("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r No Google Sheet ID found for this world! Use ");
         MutableText clickable = Text.literal("§b§n/statify sheetid [ID]§r")
                 .setStyle(Style.EMPTY
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/statify sheetid "))
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to paste this command."))));
+                        .withClickEvent(new ClickEvent.SuggestCommand("/statify sheetid "))
+                        .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to paste this command."))));
 
         noSheetIdFound.append(clickable);
         noSheetIdFound.append(" to set one.");
@@ -104,7 +108,7 @@ public class CommandManager {
             return 1;
         }
 
-        CompletableFuture<String> currentUploadWorld = uploadManager.getUploadWorld();
+        String currentUploadWorld = uploadManager.getUploadWorld().join();
 
         if (currentUploadWorld != null && currentUploadWorld.equals(worldName)) {
             ctx.getSource().sendMessage(Text.of("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r Upload is already §benabled§r for this world."));
@@ -117,8 +121,8 @@ public class CommandManager {
             ctx.getSource().sendMessage(Text.of("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r Upload has been §benabled§r for this world. (" + worldName + ")"));
         }
 
-
-        ctx.getSource().sendFeedback(() -> Text.of("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r §cTo achieve proper functionality, §lplease restart Minecraft.§r"), false);
+        MutableText restartMessage = Text.literal("§o§7[" + StringUtils.capitalize(MOD_ID) + "]§r §cTo achieve proper functionality, §lplease restart the game.§r");
+        ctx.getSource().sendFeedback(() -> restartMessage, true);
 
         return 1;
     }

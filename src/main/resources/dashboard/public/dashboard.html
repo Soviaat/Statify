@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Statify Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+        :root {
+            --main-color: #3792ff;
+            --main-font: #f2f2f2;
+            --secondary-color: #1f1f1f;
+            --tertiary-color: #2d2d2d;
+
+            --sidebar-color: #1e6be1;
+            --sidebar-active: #4687ff;
+        }
+
+
+        /* Basic reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: "Lexend Deca", sans-serif;
+            font-weight: 300;
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--secondary-color);
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            width: 17.5rem;
+            background-color: var(--sidebar-color);
+            color: var(--main-font);
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom-right-radius: .8em;
+            border-top-right-radius: .8em;
+        }
+        .sidebar h2 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-bottom: 1px solid #7f8c8d;
+            padding-bottom: 5px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding-left: 10px;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: var(--main-font);
+            text-decoration: none;
+            display: block;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: var(--sidebar-active);
+        }
+
+        /* Main content styling */
+        .content {
+            background-color: var(--secondary-color);
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        p {
+            color: #9bb5d0;
+            font-style: italic;
+        }
+        .section-title {
+            margin-bottom: 15px;
+            padding: .8em 1.2em;
+            border-radius: .3em;
+            background-color: var(--tertiary-color);
+            width: max-content;
+            font-size: 1.5em;
+            color: #f2f2f2;
+        }
+        .stat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5em;
+            font-family: "Minecraft", sans-serif;
+            padding: 8px;
+            background: #323232;
+            border: 1px solid #565656;
+            color: #f9f9f9;
+            border-radius: 3px;
+        }
+
+        .stat > img {
+            width: 19px;
+            height: auto;
+            image-rendering: pixelated;
+        }
+
+        .work-in-progress {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        /* Nested navigation */
+        .nested {
+            margin-left: 15px;
+        }
+
+        .general-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.3em;
+        }
+
+        .analytics-container {
+            display: flex;
+            flex-direction: column;
+            background-color: #343434;
+            padding: .5em 1.5em;
+            border-radius: .5em;
+        }
+
+        .chart-container {
+            padding: 1.5em;
+        }
+
+        /*
+         * Top row: Days + World Name
+         *  - simple flex with two items
+         */
+        .general-top-row {
+            font-family: "Minecraft", sans-serif;
+            color: #f9f9f9;
+            display: flex;
+            gap: 1.2em;
+        }
+
+        .general-top-row > h3 {
+            font-weight: lighter;
+        }
+
+        /*
+         * Bottom stats: Single row by default, but wrap on smaller screens
+         */
+        .general-bottom-flex {
+            width: 80dvh;
+            padding: .5em 1.5em;
+            background-color: #343434;
+            border-radius: .5em;
+            display: flex;
+            flex-wrap: wrap; /* allow wrapping if not enough space */
+            gap: 20px;       /* spacing between items */
+        }
+
+        .logo-container {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 5em;
+            padding: 1em;
+            border-radius: .5em;
+            gap: 1em;
+            background-color: var(--tertiary-color);
+        }
+
+        .logo-container > img {
+            width: 4em;
+            height: auto;
+        }
+
+        .welcome-container {
+            display: flex;
+            align-items: center;
+            gap: 1em;
+            width: 100%;
+            height: max-content;
+            margin-bottom: 1em;
+        }
+
+        .welcome-container > .head-icon {
+            width: 3rem;
+        }
+
+        .head-icon > img {
+            width: 100%;
+            height: auto;
+            border-radius: .35em;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="welcome-container">
+        <div class="head-icon">
+        </div>
+        <div class="welcome-text"></div>
+    </div>
+    <h2>Main Section</h2>
+    <ul>
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li>
+            <a href="#items" class="nav-link">Items</a>
+            <ul class="nested">
+                <li><a href="#mined" class="nav-link">Times Mined</a></li>
+                <li><a href="#broken" class="nav-link">Times Broken</a></li>
+                <li><a href="#placed" class="nav-link">Times Placed</a></li>
+                <li><a href="#crafted" class="nav-link">Times Crafted</a></li>
+                <li><a href="#pickedup" class="nav-link">Times Picked Up</a></li>
+                <li><a href="#dropped" class="nav-link">Times Dropped</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#mobs" class="nav-link">Mobs</a>
+            <ul class="nested">
+                <li><a href="#mobkills" class="nav-link">Times Killed</a></li>
+            </ul>
+        </li>
+    </ul>
+
+    <div class="logo-container">
+        <img src="/imgs/Statify_border.png" alt="Statify_border.webp">
+        <span>Statify <br> Dashboard</span>
+    </div>
+</div>
+
+<!-- Main content area -->
+<div class="content">
+    <div id="pageContent">
+        <!-- Dynamic content will be loaded here -->
+    </div>
+</div>
+
+<script>
+    // Get world parameter from URL query string (e.g., ?world=another_setets)
+    const foodItems = [
+        "apple", "baked_potato", "beetroot", "beetroot_soup", "bread", "cake", "carrot",
+        "chorus_fruit", "cooked_chicken", "cooked_cod", "cooked_mutton", "cooked_porkchop",
+        "cooked_rabbit", "cooked_salmon", "cookie", "dried_kelp", "enchanted_golden_apple",
+        "golden_apple", "glow_berries", "golden_carrot", "honey_bottle", "melon_slice",
+        "mushroom_stew", "poisonous_potato", "potato", "pufferfish", "pumpkin_pie",
+        "rabbit_stew", "beef", "chicken", "cod", "mutton", "porkchop", "rabbit", "salmon",
+        "rotten_flesh", "spider_eye", "steak", "suspicious_stew", "sweet_berries", "tropical_fish"
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const world = urlParams.get('world') || 'defaultWorld';
+
+    const headIcon = document.querySelector(".head-icon");
+    const playerImg = document.createElement("img");
+    const welcomeText = document.querySelector(".welcome-text");
+
+    let player = ""
+
+    // Cached data variables
+    let daysData = null;
+    let statsData = null; // Expected nested JSON e.g., { mined: {...}, killed: {...}, custom: {...}, used: {...}, ... }
+
+    // Fetch data from an endpoint
+    function fetchData(endpoint) {
+        return fetch(`${endpoint}?world=${world}`)
+            .then(response => response.json())
+            .catch(err => {
+                console.error('Error fetching data from', endpoint, err);
+                return null;
+            });
+    }
+
+    function getFoodStats(usedStats) {
+        if (!usedStats) {
+            console.error("Used stats data is undefined or empty!");
+            return {};
+        }
+
+        return Object.entries(usedStats)
+            .filter(([key, value]) => {
+                const itemName = key.replace("minecraft:", ""); // Remove "minecraft:" prefix
+                const isFood = foodItems.includes(itemName);
+                if (!isFood) console.log(`Ignoring: ${itemName} (${value})`); // Debug log for unexpected items
+                return isFood;
+            })
+            .reduce((obj, [key, value]) => {
+                const cleanedKey = key.replace("minecraft:", "").replace(/_/g, " "); // Format key
+                obj[cleanedKey] = value;
+                return obj;
+            }, {});
+    }
+
+    function convertDistance(customStats) {
+        if (!customStats) return {};
+        return {
+            "Walked": (customStats["minecraft:walk_one_cm"] || 0) / 100,
+            "Sprinted": (customStats["minecraft:sprint_one_cm"] || 0) / 100,
+            "Flown": (customStats["minecraft:fly_one_cm"] || 0) / 100,
+            "Swum": (customStats["minecraft:swim_one_cm"] || 0) / 100,
+            "Climbed": (customStats["minecraft:climb_one_cm"] || 0) / 100,
+            "Crouched": (customStats["minecraft:crouch_one_cm"] || 0) / 100,
+        };
+    }
+
+    // Extract non-empty data
+    function extractData(statsCategory) {
+        if (!statsCategory) return {};
+        return Object.entries(statsCategory)
+            .reduce((obj, [key, value]) => {
+                obj[key.replace("minecraft:", "").replace(/_/g, " ")] = value;
+                return obj;
+            }, {});
+    }
+
+    // Exclude food items from "used"
+    function extractNonFoodItems(usedStats) {
+        if (!usedStats) return {};
+        return Object.entries(usedStats)
+            .filter(([key]) => !foodItems.includes(key.replace("minecraft:", ""))) // Exclude food
+            .reduce((obj, [key, value]) => {
+                obj[key.replace("minecraft:", "").replace(/_/g, " ")] = value;
+                return obj;
+            }, {});
+    }
+
+    function renderPieChart(chartId, title, data) {
+        let labels = Object.keys(data);
+        let values = Object.values(data);
+
+        let options = {
+            chart: {
+                type: "pie",
+                height: 300,
+            },
+            labels: labels,
+            series: values.length > 0 ? values : [1], // Prevent empty chart error
+            colors: ["#FF5733", "#33FF57", "#3357FF", "#FFC300", "#C70039", "#900C3F", "#581845"],
+            title: {
+                text: title,
+                align: "center",
+                style: { fontSize: "16px" }
+            },
+            noData: {
+                text: "No Data Available",
+                align: "center",
+                verticalAlign: "middle",
+                style: { fontSize: "14px" }
+            }
+        };
+
+        let chart = new ApexCharts(document.querySelector(chartId), options);
+        chart.render();
+    }
+
+    function formatTime(ticks) {
+        const seconds = Math.floor(ticks / 20); // 1 tick = 1/20 sec
+        if (seconds < 60) return `${seconds} second${seconds !== 1 ? "s" : ""}`;
+
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""}`;
+
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+
+        return remainingHours > 0
+            ? `${days} day${days !== 1 ? "s" : ""} (${remainingHours} hour${remainingHours !== 1 ? "s" : ""})`
+            : `${days} day${days !== 1 ? "s" : ""}`;
+    }
+    // Render the merged General section
+    // Top row: Days + World Name
+    // Bottom row: Play time, Play time (with Pause), Distance Walked, Times Jumped, and Blocks Placed (summed from "used")
+    function renderHome() {
+        Promise.all([fetchData('/data/days'), fetchData('/data/stats'), fetchData("/data/player")]).then(([daysResult, statsResult, playerName]) => {
+            daysData = daysResult;
+            statsData = statsResult;
+            player = playerName;
+
+            console.log(getFoodStats(statsData["used"]));
+            console.log(statsData)
+            // The "custom" object may contain play_time, total_world_time, walk_one_cm, jump, etc.
+            const customData = statsData ? statsData["custom"] : {};
+
+            // Extract or default to zero for custom stats
+            const playTime = customData["minecraft:play_time"] ?? 0;
+            const totalWorldTime = customData["minecraft:total_world_time"] ?? 0;
+            const walkOneCm = customData["minecraft:walk_one_cm"] ?? 0;
+            const jump = customData["minecraft:jump"] ?? 0;
+            const dmgDealt = customData["minecraft:damage_dealt"] ?? 0;
+
+            playerImg.src = `https://cravatar.eu/avatar/${player}/64.png`;
+            headIcon.appendChild(playerImg);
+
+            welcomeText.innerText = `Welcome, ${player}!`;
+
+            // Calculate total blocks placed from the "used" group (which represents placed blocks)
+            const usedGroup = statsData ? statsData["used"] : {};
+            let blocksPlaced = 0;
+            if (usedGroup) {
+                for (const key in usedGroup) {
+                    blocksPlaced += usedGroup[key];
+                }
+            }
+
+            const mobsGroup = statsData ? statsData["killed"] : {};
+            let mobsKilled = 0;
+            if (mobsGroup) {
+                for (const key in mobsGroup) {
+                    mobsKilled += mobsGroup[key];
+                }
+            }
+
+            const itemsGroup = statsData ? statsData["picked_up"] : {};
+            let itemsPickedUp = 0;
+            if (itemsGroup) {
+                for (const key in itemsGroup) {
+                    itemsPickedUp += itemsGroup[key];
+                }
+            }
+
+            // Convert walk_one_cm (cm) to meters. Display as km if >=500m.
+            const meters = walkOneCm / 100;
+            let walkDisplay;
+            if (meters >= 500) {
+                const km = (meters / 1000).toFixed(1);
+                walkDisplay = `${km}km (${Math.floor(meters)}m)`;
+            } else {
+                walkDisplay = `${Math.floor(meters)}m`;
+            }
+
+            // Build the HTML with two main sections:
+            // 1. Top row (Days and World Name)
+            // 2. Bottom row (flex items) for custom stats and the new Blocks Placed stat.
+            const html = `
+                <div class="general-container">
+                    <h2 class="section-title">Home</h2>
+                    <!-- Top row: Days and World Name -->
+                    <div class="general-top-row">
+                        <h1>${world.toUpperCase()}</h1>
+                        <h3>Days: ${daysData ?? 0}</h3>
+                    </div>
+                    <!-- Bottom row: Flex container for stats -->
+                    <div class="general-bottom-flex">
+                        <div class="stat">Playtime: ${formatTime(playTime)}</div>
+                        <div class="stat">Playtime (with Pause): ${formatTime(totalWorldTime)}</div>
+                        <div class="stat">Damage Dealt: ${Math.floor(dmgDealt / 20)} <img src="/imgs/heart.png" alt=""></div>
+                        <div class="stat">Distance Walked: ${walkDisplay}</div>
+                        <div class="stat">Times Jumped: ${jump}</div>
+                        <div class="stat">Blocks Placed: ${blocksPlaced}</div>
+                        <div class="stat">Items Picked up: ${itemsPickedUp}</div>
+                        <div class="stat">Mobs Killed: ${mobsKilled}</div>
+                    </div>
+
+                    <div class="analytics-container">
+                        <h1 class="section-title">Analytics</h1>
+                        <div class="chart-container"></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('pageContent').innerHTML = html;
+        });
+    }
+
+    // Render a group of stats (for Items and Mobs)
+    function renderGroup(action, title) {
+        if (!statsData) {
+            fetchData('/data/stats').then(data => {
+                statsData = data;
+                displayGroup(action, title, data);
+            });
+        } else {
+            displayGroup(action, title, statsData);
+        }
+    }
+
+    // Render Analytics (WIP)
+    function renderAnalytics() {
+        document.getElementById('pageContent').innerHTML = `
+            <h2 class="section-title">Analytics</h2>
+            <p class="work-in-progress">Work in progress...</p>
+        `;
+    }
+
+    // Display a group from nested stats data (for Items and Mobs)
+    function displayGroup(action, title, data) {
+        const groupData = data[action];
+        let html = `<h2 class="section-title">${title}</h2>`;
+        if (groupData && Object.keys(groupData).length > 0) {
+            for (const identifier in groupData) {
+                if (groupData[identifier] !== 0) { // Skip zero values
+                    html += `<div class="stat">${identifier}: ${groupData[identifier]}</div>`;
+                }
+            }
+        } else {
+            html += `<p>No data found for ${title}.</p>`;
+        }
+        document.getElementById('pageContent').innerHTML = html;
+    }
+
+    // Navigation handler based on URL hash
+    function loadPage() {
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        const hash = window.location.hash || '#home';
+        const currentLink = document.querySelector(`.nav-link[href="${hash}"]`);
+        if (currentLink) {
+            currentLink.classList.add('active');
+        }
+        switch(hash) {
+            case '#general':
+                renderHome();
+                break;
+            case '#mined':
+                renderGroup('mined', 'Times Mined');
+                break;
+            case '#broken':
+                renderGroup('broken', 'Times Broken');
+                break;
+            case '#placed':
+                renderGroup('used', 'Times Placed');
+                break;
+            case '#crafted':
+                renderGroup('crafted', 'Times Crafted');
+                break;
+            case '#pickedup':
+                renderGroup('picked_up', 'Times Picked Up');
+                break;
+            case '#dropped':
+                renderGroup('dropped', 'Times Dropped');
+                break;
+            case '#mobkills':
+                renderGroup('killed', 'Times Killed');
+                break;
+            case '#items':
+                document.getElementById('pageContent').innerHTML = `
+                    <h2 class="section-title">Items</h2>
+                    <p>Select a subcategory from the sidebar.</p>
+                `;
+                break;
+            case '#mobs':
+                document.getElementById('pageContent').innerHTML = `
+                    <h2 class="section-title">Mobs</h2>
+                    <p>Select a subcategory from the sidebar.</p>
+                `;
+                break;
+            default:
+                renderHome();
+        }
+    }
+
+    // Refresh data every 30 seconds
+    setInterval(() => {
+        Promise.all([fetchData('/data/days'), fetchData('/data/stats')]).then(([daysResult, statsResult]) => {
+            daysData = daysResult;
+            statsData = statsResult;
+            loadPage(); // Re-render page content with updated data
+        });
+    }, 30000);
+
+    window.addEventListener('hashchange', loadPage, false);
+    loadPage();
+</script>
+</body>
+</html>

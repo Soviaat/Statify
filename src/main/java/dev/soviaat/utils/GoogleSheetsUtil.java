@@ -9,6 +9,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 
 import dev.soviaat.FileManagement;
 import dev.soviaat.Statify;
+import dev.soviaat.commands.SheetId;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -38,7 +39,7 @@ public class GoogleSheetsUtil {
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/spreadsheets"));
     }
 
-    private static Sheets getSheetService() throws IOException, GeneralSecurityException {
+    public static Sheets getSheetService() throws IOException, GeneralSecurityException {
         if (sheetService == null) {
             sheetService = new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, new HttpCredentialsAdapter(authorize()))
                     .setApplicationName(APP_NAME).build();
@@ -68,6 +69,7 @@ public class GoogleSheetsUtil {
                             .update(sheetId, range, body)
                             .setValueInputOption("RAW")
                             .execute();
+
 
                     LOGGER.info("Uploaded data from CSV to Google Sheets: {}", csvFilePath);
                 } catch (IOException | GeneralSecurityException e) {

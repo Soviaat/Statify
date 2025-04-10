@@ -2,6 +2,7 @@ package dev.soviaat;
 
 import com.google.common.reflect.TypeToken;
 
+import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -26,7 +27,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static dev.soviaat.Common.*;
-
 
 public class FileManagement {
     static Map<String, StatType<?>> statCategories;
@@ -138,6 +138,19 @@ public class FileManagement {
         });
     }
 
+    public static void savePlayerName(String playerName, String worldName) {
+        Path path = Paths.get("Statify", worldName, "player.txt");
+        File file = path.toFile();
+
+        file.getParentFile().mkdirs();
+
+        try (FileWriter fw = new FileWriter(file)) {
+            fw.write(playerName.replaceAll("literal\\{(.+?)\\}", "$1"));
+        } catch (IOException e) {
+            LOGGER.error("Failed to write player name to file", e);
+        }
+    }
+
     public static void loadWorldStatus() {
         File configFile = new File(CONFIG_FILE);
         if (configFile.exists()) {
@@ -180,6 +193,49 @@ public class FileManagement {
         }
     }
 
+    public static void removeSheetIdFromJson(String worldName, String sheetId) {
+        Path path = Paths.get("Statify", worldName, "sheet_id.json");
+        File file = path.toFile();
+
+        if (!file.exists()) {
+            LOGGER.warn("Sheet ID file does not exist for world: {}", worldName);
+            return;
+        }
+
+        JsonObject json = null;
+        // Read the current JSON from the file
+        try (FileReader reader = new FileReader(file)) {
+            json = gson.fromJson(reader, JsonObject.class);
+        } catch (IOException e) {
+            LOGGER.error("Failed to read Sheet ID file for world: {}", worldName, e);
+            return;
+        }
+
+        if (json == null || !json.has("sheetId")) {
+            LOGGER.warn("No sheetId found in file for world: {}", worldName);
+            return;
+        }
+
+        // Check if the stored sheetId matches the provided one
+        String currentSheetId = json.get("sheetId").getAsString();
+        if (!currentSheetId.equals(sheetId)) {
+            LOGGER.warn("The provided sheetId ({}) does not match the one in file ({}) for world: {}", sheetId, currentSheetId, worldName);
+            return;
+        }
+
+        // Remove the sheetId key
+        json.remove("sheetId");
+        LOGGER.info("Removed sheetId: {} for world: {}", sheetId, worldName);
+
+        // Write the updated JSON back to the file
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(json, writer);
+        } catch (IOException e) {
+            LOGGER.error("Failed to write updated sheetId file for world: {}", worldName, e);
+        }
+    }
+
+
     public static String loadSheetIdFromJson(String worldName) {
         Path path = Paths.get("Statify", worldName, "sheet_id.json");
         File file = path.toFile();
@@ -195,7 +251,7 @@ public class FileManagement {
 
             return sheetIdMap.getOrDefault("sheetId", null);
         } catch (IOException e) {
-            LOGGER.error("Failed to load Sheets ID for world: {}", worldName, e);
+            LOGGER.error("Failed to load Sheet's ID for world: {}", worldName, e);
             return null;
         }
     }

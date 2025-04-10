@@ -19,6 +19,8 @@ public class Common {
     public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     public static Map<String, String> worldStatusMap = new HashMap<>();
     public static int dayCount;
+    public static final String CURRENT_SHEET_VERSION = "1.1";
+    public static String PLAYER_SHEET_VERSION;
 
     public static final String CONFIG_FILE = "Statify/statify_worlds.json";
 
