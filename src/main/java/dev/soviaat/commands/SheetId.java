@@ -7,12 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import dev.soviaat.Common;
 import dev.soviaat.FileManagement;
 import dev.soviaat.utils.GoogleSheetsUtil;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -21,31 +17,31 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class SheetId {
-    public static int sheetId(CommandContext<CommandSourceStack> ctx) {
+    public static int sheetId(CommandContext<ServerCommandSource> ctx) {
         String sheetId = StringArgumentType.getString(ctx, "sheetId");
-        String worldName = ctx.getSource().getServer().getWorldData().getLevelName();
+        String worldName = ctx.getSource().getServer().getSaveProperties().getLevelName();
         FileManagement.saveSheetIdToJson(worldName, sheetId);
         boolean versionMatches = checkSheetVersion(worldName);
         Common.LOGGER.info("Version: {}", versionMatches);
 
         if (versionMatches) {
-            ctx.getSource().sendSuccess(() -> Component.literal("§o§7[" + StringUtils.capitalize("statify") + "]§r Sheets ID set to: " + sheetId + " for " + worldName), false);
+            ctx.getSource().sendFeedback(() -> Text.literal("§o§7[" + StringUtils.capitalize("statify") + "]§r Sheets ID set to: " + sheetId + " for " + worldName), false);
         } else {
-            ctx.getSource().sendSuccess(SheetId::sendOutdatedSheetMessage, false);
+            ctx.getSource().sendFeedback(SheetId::sendOutdatedSheetMessage, false);
             FileManagement.removeSheetIdFromJson(worldName, sheetId);
         }
 
         return 1;
     }
 
-    public static MutableComponent sendOutdatedSheetMessage() {
+    public static MutableText sendOutdatedSheetMessage() {
         URI sheetURI = URI.create("https://docs.google.com/spreadsheets/d/1nGZAkqGMEmltLfvBtCr4GKUFrnvnlBlJlPddw4Wj6sc");
         String var10000 = StringUtils.capitalize("statify");
-        MutableComponent baseMessage = Component.literal("§o§7[" + var10000 + "]§r Sheet version is outdated (Your version: " + Common.PLAYER_SHEET_VERSION + "), please update it to ");
-        MutableComponent maskedUrl = Component.literal("§o§dlatest version (1.1)§r")
+        MutableText baseMessage = Text.literal("§o§7[" + var10000 + "]§r Sheet version is outdated (Your version: " + Common.PLAYER_SHEET_VERSION + "), please update it to ");
+        MutableText maskedUrl = Text.literal("§o§dlatest version (1.1)§r")
                 .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(sheetURI))
-                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to update to the latest Sheet version"))));
-        MutableComponent willNotWork = Component.literal(" §c(INFO: Sheet ID will not be initialized, please use the latest version.)§r");
+                        .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to update to the latest Sheet version"))));
+        MutableText willNotWork = Text.literal(" §c(INFO: Sheet ID will not be initialized, please use the latest version.)§r");
         baseMessage.append(maskedUrl);
         baseMessage.append(willNotWork);
         return baseMessage;

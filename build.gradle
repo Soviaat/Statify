@@ -1,8 +1,3 @@
-import org.gradle.api.JavaVersion
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.compile.JavaCompile
-
 plugins {
 	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
@@ -13,11 +8,6 @@ group = project.maven_group
 
 base {
 	archivesName = project.archives_base_name
-}
-
-configurations {
-	shadowImplementation
-	implementation.extendsFrom shadowImplementation
 }
 
 repositories {
@@ -43,19 +33,23 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	shadowImplementation "com.google.api-client:google-api-client:2.6.0"
-	shadowImplementation "com.google.apis:google-api-services-sheets:v4-rev20240708-2.0.0"
-	shadowImplementation "com.google.apis:google-api-services-oauth2:v2-rev20200213-2.0.0"
-	shadowImplementation "com.google.oauth-client:google-oauth-client:1.36.0"
-	shadowImplementation "com.google.auth:google-auth-library-credentials:1.24.0"
-	shadowImplementation "com.google.code.gson:gson:2.11.0"
-	shadowImplementation "com.google.http-client:google-http-client-gson:1.43.3"
-	shadowImplementation "io.github.cdimascio:java-dotenv:5.2.2"
+	implementation "com.google.api-client:google-api-client:2.6.0"
+	implementation "com.google.apis:google-api-services-sheets:v4-rev20240708-2.0.0"
+	implementation "com.google.apis:google-api-services-oauth2:v2-rev20200213-2.0.0"
+	implementation "com.google.oauth-client:google-oauth-client:1.36.0"
+	implementation "com.google.auth:google-auth-library-credentials:1.24.0"
+	implementation "com.google.code.gson:gson:2.11.0"
+
+	// REQUIRED transport (this is critical)
+	implementation "com.google.http-client:google-http-client-gson:1.43.3"
+
+	// dotenv
+	implementation "io.github.cdimascio:java-dotenv:5.2.2"
 
 	// bundle into the mod jar
 	include "com.google.api-client:google-api-client:2.6.0"
 	include "com.google.apis:google-api-services-sheets:v4-rev20240708-2.0.0"
-	include "com.google.apis:google-api-services-oauth2:v2-rev20200213-2.0.0"
+	include "com.google.apis:google-api-services-oauth2:v2-rev20240708-2.0.0"
 	include "com.google.oauth-client:google-oauth-client:1.36.0"
 	include "com.google.auth:google-auth-library-credentials:1.24.0"
 	include "com.google.code.gson:gson:2.11.0"
@@ -85,22 +79,11 @@ java {
 	targetCompatibility = JavaVersion.VERSION_21
 }
 
-remapJar {
-	archiveFileName = "${project.archives_base_name}-${project.mod_version}_${project.minecraft_version}.jar"
-}
-
 jar {
 	inputs.property "archivesName", project.base.archivesName
 
 	from("LICENSE") {
 		rename { "${it}_${inputs.properties.archivesName}"}
-	}
-
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	from {
-		configurations.shadowImplementation.collect {
-			it.isDirectory() ? it : zipTree(it)
-		}
 	}
 }
 
