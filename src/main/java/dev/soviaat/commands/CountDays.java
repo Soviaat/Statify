@@ -1,6 +1,7 @@
 package dev.soviaat.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
@@ -12,15 +13,14 @@ public class CountDays {
     public static int dayTime;
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-        dispatcher.register(CommandManager.literal("days").executes(CountDays::execute));
+        dispatcher.register((LiteralArgumentBuilder<ServerCommandSource>) CommandManager.literal("days").executes(CountDays::execute));
     }
 
     private static int execute(CommandContext<ServerCommandSource> ctx) {
         ServerCommandSource source = ctx.getSource();
         ServerWorld world = source.getWorld();
-        dayTime = (int) (world.getTimeOfDay() / 24000);
-
-        source.sendMessage(Text.of("Day count: " + dayTime + " days"));
+        dayTime = (int) (world.getTimeOfDay() / 24000L);
+        source.sendFeedback(() -> Text.literal("Day count: " + dayTime + " days"), false);
         return 1;
     }
 }
