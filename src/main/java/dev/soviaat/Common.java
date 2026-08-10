@@ -17,7 +17,7 @@ public class Common {
     public static final String MOD_ID = "statify";
     public static final Logger LOGGER = LoggerFactory.getLogger("statify");
     public static final Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
-    public static Map<String, String> worldStatusMap = new HashMap();
+    public static Map<String, String> worldStatusMap = new HashMap<>();
     public static int dayCount;
     public static final String CURRENT_SHEET_VERSION = "1.1";
     public static String PLAYER_SHEET_VERSION;

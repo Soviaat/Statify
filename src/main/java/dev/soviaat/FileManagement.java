@@ -14,18 +14,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stat;
-import net.minecraft.stat.StatHandler;
-import net.minecraft.stat.StatType;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
-import net.minecraft.registry.Registries;
-
-import static com.mojang.text2speech.Narrator.LOGGER;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.ServerStatsCounter;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatType;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class FileManagement {
     static Map<String, StatType<?>> statCategories = new LinkedHashMap<>();
@@ -40,47 +38,44 @@ public class FileManagement {
         }
     }
 
-    public static void writeStatsToFile(ServerPlayerEntity player, String worldName) {
+    public static void writeStatsToFile(ServerPlayer player, String worldName) {
         CompletableFuture.runAsync(() -> {
             try {
-                StatHandler statHandler = player.getStatHandler();
+                ServerStatsCounter statHandler = player.getStats();
                 StringBuilder statsBuilder = new StringBuilder();
 
                 for (Map.Entry<String, StatType<?>> categoryEntry : statCategories.entrySet()) {
                     String category = categoryEntry.getKey();
                     StatType<?> statType = categoryEntry.getValue();
 
-                    for (Object entry : statType.getRegistry().getEntrySet()) {
-                        if (entry instanceof Map.Entry<?, ?> typedEntry) {
-                            Object key = typedEntry.getValue();
-                            Stat<?> stat = null;
-                            String statName = null;
-                            switch (key) {
-                                case Identifier id -> {
-                                    stat = ((StatType<Identifier>) statType).getOrCreateStat(id);
-                                    statName = id.toString();
-                                }
-                                case Block block -> {
-                                    stat = ((StatType<Block>) statType).getOrCreateStat(block);
-                                    statName = Registries.BLOCK.getId(block).toString();
-                                }
-                                case Item item -> {
-                                    stat = ((StatType<Item>) statType).getOrCreateStat(item);
-                                    statName = Registries.ITEM.getId(item).toString();
-                                }
-                                case EntityType entity -> {
-                                    stat = ((StatType<EntityType>) statType).getOrCreateStat(entity);
-                                    statName = Registries.ENTITY_TYPE.getId(entity).toString();
-                                }
-                                default -> {
-                                    LOGGER.warn("Unexpected key type: {}", key.getClass().getName());
-                                }
+                    for (Object key : statType.getRegistry()) {
+                        Stat<?> stat = null;
+                        String statName = null;
+                        switch (key) {
+                            case Identifier id -> {
+                                stat = ((StatType<Identifier>) statType).get(id);
+                                statName = id.toString();
                             }
+                            case Block block -> {
+                                stat = ((StatType<Block>) statType).get(block);
+                                statName = BuiltInRegistries.BLOCK.getKey(block).toString();
+                            }
+                            case Item item -> {
+                                stat = ((StatType<Item>) statType).get(item);
+                                statName = BuiltInRegistries.ITEM.getKey(item).toString();
+                            }
+                            case EntityType<?> entity -> {
+                                stat = ((StatType<EntityType<?>>) statType).get(entity);
+                                statName = BuiltInRegistries.ENTITY_TYPE.getKey(entity).toString();
+                            }
+                            default -> {
+                                Common.LOGGER.warn("Unexpected key type: {}", key.getClass().getName());
+                            }
+                        }
 
-                            if (stat != null) {
-                                int value = statHandler.getStat(stat);
-                                statsBuilder.append(category).append(";").append(statName).append(";").append(value).append("\n");
-                            }
+                        if (stat != null) {
+                            int value = statHandler.getValue(stat);
+                            statsBuilder.append(category).append(";").append(statName).append(";").append(value).append("\n");
                         }
                     }
                 }
@@ -123,19 +118,20 @@ public class FileManagement {
             createParentDirs(file);
 
             try (FileWriter fw = new FileWriter(file, StandardCharsets.UTF_8)) {
-                fw.write(playerName.replaceAll("literal\\{(.+?)\\}", "$1"));
+                fw.write(playerName.replaceAll("literal\\{(.+?)}", "$1"));
             }
         } catch (IOException e) {
             Common.LOGGER.error("Failed to write player name to file", e);
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void loadWorldStatus() {
         File configFile = new File("Statify/statify_worlds.json");
         if (configFile.exists()) {
             try (FileReader reader = new FileReader(configFile, StandardCharsets.UTF_8)) {
                 Type type = (new TypeToken<Map<String, String>>() {}).getType();
-                Common.worldStatusMap = (Map) Common.gson.fromJson(reader, type);
+                Common.worldStatusMap = (Map<String, String>) Common.gson.fromJson(reader, type);
                 Common.LOGGER.info("Loaded world status from JSON: {}", Common.worldStatusMap);
             } catch (IOException e) {
                 Common.LOGGER.error("Failed to load world status from JSON", e);
@@ -220,6 +216,7 @@ public class FileManagement {
         });
     }
 
+    @SuppressWarnings("unchecked")
     public static String loadSheetIdFromJson(String worldName) {
         Path path = Paths.get("Statify", worldName, "sheet_id.json");
         File file = path.toFile();
@@ -229,7 +226,7 @@ public class FileManagement {
         } else {
             try (FileReader r = new FileReader(file, StandardCharsets.UTF_8)) {
                 Type type = (new TypeToken<Map<String, String>>() {}).getType();
-                Map<String, String> sheetIdMap = (Map) Common.gson.fromJson(r, type);
+                Map<String, String> sheetIdMap = (Map<String, String>) Common.gson.fromJson(r, type);
                 return sheetIdMap.getOrDefault("sheetId", null);
             } catch (IOException e) {
                 Common.LOGGER.error("Failed to load Sheet's ID for world: {}", worldName, e);
@@ -240,12 +237,12 @@ public class FileManagement {
 
     static {
         statCategories.put("custom", Stats.CUSTOM);
-        statCategories.put("mined", Stats.MINED);
-        statCategories.put("used", Stats.USED);
-        statCategories.put("broken", Stats.BROKEN);
-        statCategories.put("crafted", Stats.CRAFTED);
-        statCategories.put("picked_up", Stats.PICKED_UP);
-        statCategories.put("dropped", Stats.DROPPED);
-        statCategories.put("killed", Stats.KILLED);
+        statCategories.put("mined", Stats.BLOCK_MINED);
+        statCategories.put("used", Stats.ITEM_USED);
+        statCategories.put("broken", Stats.ITEM_BROKEN);
+        statCategories.put("crafted", Stats.ITEM_CRAFTED);
+        statCategories.put("picked_up", Stats.ITEM_PICKED_UP);
+        statCategories.put("dropped", Stats.ITEM_DROPPED);
+        statCategories.put("killed", Stats.ENTITY_KILLED);
     }
 }
