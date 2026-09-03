@@ -38,6 +38,63 @@ public class FileManagement {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static Map<String, Map<String, String>> loadCoordsFromJson() {
+        File coordsFile = new File("Statify/savedCoords.json");
+        if (!coordsFile.exists()) {
+            return new LinkedHashMap<>();
+        }
+        try (FileReader reader = new FileReader(coordsFile, StandardCharsets.UTF_8)) {
+            Type type = (new TypeToken<Map<String, Map<String, String>>>() {}).getType();
+            Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) Common.gson.fromJson(reader, type);
+            return data != null ? data : new LinkedHashMap<>();
+        } catch (IOException e) {
+            Common.LOGGER.error("Failed to load saved coordinates from JSON", e);
+            return new LinkedHashMap<>();
+        }
+    }
+
+    public static void saveCoord(String worldName, String coordName, String coords) {
+        try {
+            Map<String, Map<String, String>> data = loadCoordsFromJson();
+            data.computeIfAbsent(worldName, k -> new LinkedHashMap<>()).put(coordName, coords);
+
+            File coordsFile = new File("Statify/savedCoords.json");
+            if (createParentDirs(coordsFile)) {
+                try (FileWriter writer = new FileWriter(coordsFile, StandardCharsets.UTF_8)) {
+                    Common.gson.toJson(data, writer);
+                    Common.LOGGER.info("Saved coordinate '{}' for world '{}'", coordName, worldName);
+                }
+            }
+        } catch (IOException e) {
+            Common.LOGGER.error("Failed to save coordinate to JSON", e);
+        }
+    }
+
+    public static void deleteCoord(String worldName, String coordName) {
+        try {
+            Map<String, Map<String, String>> data = loadCoordsFromJson();
+            if (data.containsKey(worldName)) {
+                data.get(worldName).remove(coordName);
+
+                File coordsFile = new File("Statify/savedCoords.json");
+                if (createParentDirs(coordsFile)) {
+                    try (FileWriter writer = new FileWriter(coordsFile, StandardCharsets.UTF_8)) {
+                        Common.gson.toJson(data, writer);
+                        Common.LOGGER.info("Deleted coordinate '{}' for world '{}'", coordName, worldName);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Common.LOGGER.error("Failed to delete coordinate from JSON", e);
+        }
+    }
+
+    public static Map<String, String> getCoordsForWorld(String worldName) {
+        Map<String, Map<String, String>> data = loadCoordsFromJson();
+        return data.getOrDefault(worldName, new LinkedHashMap<>());
+    }
+
     public static void writeStatsToFile(ServerPlayer player, String worldName) {
         CompletableFuture.runAsync(() -> {
             try {

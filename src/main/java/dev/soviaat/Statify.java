@@ -36,10 +36,17 @@ public class Statify implements ModInitializer {
 		});
 
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-			for (ServerLevel world : server.getAllLevels()) {
-				String worldName = server.getWorldData().getLevelName();
-				if ("on".equals(Common.worldStatusMap.getOrDefault(worldName, "off"))) {
-					long worldTime = world.getGameTime();
+			String worldName = server.getWorldData().getLevelName();
+
+			if ("on".equals(Common.worldStatusMap.getOrDefault(worldName, "off"))) {
+				for (ServerLevel world : server.getAllLevels()) {
+					long worldTime = world.dimensionType().defaultClock()
+							.map(clock -> world.clockManager().getTotalTicks(clock))
+							.orElseGet(() -> {
+								return server.overworld().dimensionType().defaultClock()
+										.map(c -> server.overworld().clockManager().getTotalTicks(c))
+										.orElse(0L);
+							});
 
 					for (ServerPlayer player : world.players()) {
 						CompletableFuture.runAsync(() -> {
@@ -68,12 +75,14 @@ public class Statify implements ModInitializer {
 						FileManagement.writeStatsToFile(player, worldName);
 					}
 
+					long currentClockTicks = world.clockManager().getTotalTicks(world.dimensionType().defaultClock().get());
+
 					if (isUploading) {
-						this.uploadToSheetsAsync(worldName, currentTime);
+						this.uploadToSheetsAsync(worldName, currentClockTicks);
 					}
 
-					if ((long)Common.getDayCount(worldName) < currentTime / 24000L) {
-						Common.putDayCount((int)(currentTime / 24000L));
+					if ((long)Common.getDayCount(worldName) < currentClockTicks / 24000L) {
+						Common.putDayCount((int)(currentClockTicks / 24000L));
 						FileManagement.writeDaysToFile(worldName, Common.getDayCountAsString());
 						if (isUploading) {
 							String dayFilePath = "Statify/" + worldName + "/days.csv";

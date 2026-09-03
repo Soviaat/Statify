@@ -1,6 +1,7 @@
 package dev.soviaat.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.soviaat.Common;
@@ -32,6 +33,30 @@ public class CommandManagement {
                                         .then(Commands.literal("on").executes(CommandManagement::statifyUploadOn))
                                         .then(Commands.literal("off").executes(CommandManagement::statifyUploadOff))
                         )
+        );
+
+        dispatcher.register(
+                Commands.literal("save-coords")
+                        .then(Commands.argument("x", IntegerArgumentType.integer())
+                                .then(Commands.argument("y", IntegerArgumentType.integer())
+                                        .then(Commands.argument("z", IntegerArgumentType.integer())
+                                                .then(Commands.argument("coord-name", StringArgumentType.greedyString())
+                                                        .executes(ctx -> CoordCommands.saveCoord(
+                                                                ctx,
+                                                                StringArgumentType.getString(ctx, "coord-name"),
+                                                                IntegerArgumentType.getInteger(ctx, "x"),
+                                                                IntegerArgumentType.getInteger(ctx, "y"),
+                                                                IntegerArgumentType.getInteger(ctx, "z")
+                                                        ))
+                                                )
+                                        )
+                                )
+                        )
+        );
+
+        dispatcher.register(
+                Commands.literal("get-coords")
+                        .executes(CoordCommands::getCoords)
         );
     }
 
