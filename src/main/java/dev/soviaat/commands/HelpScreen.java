@@ -9,8 +9,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.component.TooltipDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,13 +44,13 @@ public class HelpScreen extends Screen {
     public HelpScreen() {
         super(Component.literal("Statify Help"));
 
-        // Parancsok és leírások
         commandList.add(new HelpCommandEntry("/statify help", "Displays this help GUI."));
         commandList.add(new HelpCommandEntry("/statify disable", "Disables stat collection."));
         commandList.add(new HelpCommandEntry("/statify enable", "Enables stat collection."));
         commandList.add(new HelpCommandEntry("/statify sheetid <id>", "Lets you specify the Google Sheets ID."));
         commandList.add(new HelpCommandEntry("/statify upload <on|off>", "Toggle uploading to Google Sheets."));
         commandList.add(new HelpCommandEntry("/save-coords <x> <y> <z> <name>", "Lets you save coordinates and dimension."));
+        commandList.add(new HelpCommandEntry("/save-coords-here <name>", "Lets you save your position as coordinates."));
         commandList.add(new HelpCommandEntry("/get-coords", "Shows GUI of your saved coordinates."));
     }
 

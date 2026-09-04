@@ -41,7 +41,6 @@ public class CommandManagement {
                                 .then(Commands.argument("y", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer())
                                                 .then(Commands.argument("coord-name", StringArgumentType.string())
-                                                        // Dimenzió NÉLKÜL (Default: overworld)
                                                         .executes(ctx -> CoordCommands.saveCoord(
                                                                 ctx,
                                                                 StringArgumentType.getString(ctx, "coord-name"),
@@ -50,7 +49,6 @@ public class CommandManagement {
                                                                 IntegerArgumentType.getInteger(ctx, "z"),
                                                                 "overworld"
                                                         ))
-                                                        // Dimenzióval MEGADVA
                                                         .then(Commands.argument("dimension", StringArgumentType.word())
                                                                 .executes(ctx -> CoordCommands.saveCoord(
                                                                         ctx,

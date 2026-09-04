@@ -22,8 +22,8 @@ public class IconPickerScreen extends Screen {
     private final SavedCoord coord;
     private final List<ItemStack> availableItems = new ArrayList<>();
 
-    private static final int ICON_SIZE = 20; // 16x16 ikon + padding
-    private static final int COLS = 9;       // 9 ikon egy sorban (mint egy ládában)
+    private static final int ICON_SIZE = 20;
+    private static final int COLS = 9;
 
     private double scrollAmount = 0;
     private int totalRows = 0;
@@ -34,7 +34,6 @@ public class IconPickerScreen extends Screen {
         this.worldName = worldName;
         this.coord = coord;
 
-        // Összes bejegyzett item betöltése a registry-ből (levegő kivételével)
         for (Item item : BuiltInRegistries.ITEM) {
             if (item != Items.AIR) {
                 this.availableItems.add(new ItemStack(item));
@@ -48,7 +47,6 @@ public class IconPickerScreen extends Screen {
     protected void init() {
         this.clearWidgets();
 
-        // Cancel / Vissza gomb
         this.addRenderableWidget(Button.builder(Component.literal("Cancel"), btn -> this.minecraft.setScreenAndShow(parentScreen))
                 .bounds(this.width / 2 - 50, this.height - 28, 100, 20)
                 .build());
@@ -76,13 +74,10 @@ public class IconPickerScreen extends Screen {
             if (index >= 0 && index < availableItems.size()) {
                 ItemStack selectedStack = availableItems.get(index);
 
-                // 1. Frissítjük a koordináta ikonját
                 coord.setItemStack(selectedStack);
 
-                // 2. Mentés JSON-be
                 FileManagement.saveCoord(this.worldName, this.coord);
 
-                // 3. Visszatérés
                 this.minecraft.setScreenAndShow(parentScreen);
                 return true;
             }
@@ -112,13 +107,11 @@ public class IconPickerScreen extends Screen {
         int panelTop = 32;
         int panelBottom = this.height - 36;
 
-        // Teljes képernyős sötétítés + panelek a CoordsScreen mintájára
         guiGraphicsExtractor.fill(0, 0, this.width, this.height, 0x80000000); // Áttetsző fekete háttér
         guiGraphicsExtractor.fill(panelLeft, panelTop, panelRight, panelBottom, 0xC0000000);
         guiGraphicsExtractor.fill(panelLeft, panelTop - 1, panelRight, panelTop, 0xFFA0A0A0);
         guiGraphicsExtractor.fill(panelLeft, panelBottom, panelRight, panelBottom + 1, 0xFFA0A0A0);
 
-        // Cím kirajzolása
         guiGraphicsExtractor.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
 
         int gridWidth = COLS * ICON_SIZE;
@@ -126,7 +119,6 @@ public class IconPickerScreen extends Screen {
         int startY = 40;
         int visibleHeight = panelBottom - startY - 10;
 
-        // Görgetési terület levágása (Scissor)
         guiGraphicsExtractor.enableScissor(startX - 2, startY, startX + gridWidth + 2, startY + visibleHeight);
 
         ItemStack hoveredStack = null;
@@ -139,7 +131,6 @@ public class IconPickerScreen extends Screen {
             int itemY = startY + row * ICON_SIZE - (int) scrollAmount + 2;
 
             if (itemY + ICON_SIZE >= startY && itemY <= startY + visibleHeight) {
-                // Kiemelés, ha az egér felette van
                 if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16 && mouseY >= startY && mouseY <= startY + visibleHeight) {
                     guiGraphicsExtractor.fill(itemX - 2, itemY - 2, itemX + 18, itemY + 18, 0x80FFFFFF);
                     hoveredStack = availableItems.get(i);
@@ -153,7 +144,6 @@ public class IconPickerScreen extends Screen {
 
         super.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, partialTick);
 
-        // Tooltip megjelenítése, ha az egér egy elemen áll
         if (hoveredStack != null) {
             guiGraphicsExtractor.setComponentTooltipForNextFrame(this.font, List.of(hoveredStack.getHoverName()), mouseX, mouseY);
         }

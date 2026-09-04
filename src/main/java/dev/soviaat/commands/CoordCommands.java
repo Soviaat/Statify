@@ -19,7 +19,6 @@ public class CoordCommands {
         MinecraftServer server = ctx.getSource().getServer();
         String worldName = server.getWorldData().getLevelName();
 
-        // Normalizáljuk a dimenzió nevet
         String dimClean = dimension.toLowerCase().replace("the_", "");
         if (!dimClean.equals("nether") && !dimClean.equals("end")) {
             dimClean = "overworld";
@@ -46,7 +45,7 @@ public class CoordCommands {
         int y = player.getBlockY();
         int z = player.getBlockZ();
 
-        String dimension = player.level().dimension().toString();
+        String dimension = player.level().dimension().identifier().getPath();
 
         String dimClean = dimension.toLowerCase().replace("the_", "");
         if (!dimClean.equals("nether") && !dimClean.equals("end")) {
