@@ -36,5 +36,6 @@ public class CountDays {
         source.sendSuccess(() -> Component.literal("Day count: " + dayTime + " days"), false);
         return 1;
     }
+
 }
 

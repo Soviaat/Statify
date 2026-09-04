@@ -10,10 +10,15 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import dev.soviaat.achievements.AchievementData;
+import dev.soviaat.sessiontracker.SessionData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,6 +29,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+
+import static net.fabricmc.fabric.impl.resource.pack.ModPackResourcesUtil.GSON;
 
 public class FileManagement {
     static Map<String, StatType<?>> statCategories = new LinkedHashMap<>();
@@ -39,14 +46,14 @@ public class FileManagement {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Map<String, String>> loadCoordsFromJson() {
+    public static Map<String, List<SavedCoord>> loadCoordsFromJson() {
         File coordsFile = new File("Statify/savedCoords.json");
         if (!coordsFile.exists()) {
             return new LinkedHashMap<>();
         }
         try (FileReader reader = new FileReader(coordsFile, StandardCharsets.UTF_8)) {
-            Type type = (new TypeToken<Map<String, Map<String, String>>>() {}).getType();
-            Map<String, Map<String, String>> data = (Map<String, Map<String, String>>) Common.gson.fromJson(reader, type);
+            Type type = (new TypeToken<Map<String, List<SavedCoord>>>() {}).getType();
+            Map<String, List<SavedCoord>> data = (Map<String, List<SavedCoord>>) Common.gson.fromJson(reader, type);
             return data != null ? data : new LinkedHashMap<>();
         } catch (IOException e) {
             Common.LOGGER.error("Failed to load saved coordinates from JSON", e);
@@ -54,16 +61,19 @@ public class FileManagement {
         }
     }
 
-    public static void saveCoord(String worldName, String coordName, String coords) {
+    public static void saveCoord(String worldName, SavedCoord newCoord) {
         try {
-            Map<String, Map<String, String>> data = loadCoordsFromJson();
-            data.computeIfAbsent(worldName, k -> new LinkedHashMap<>()).put(coordName, coords);
+            Map<String, List<SavedCoord>> data = loadCoordsFromJson();
+            List<SavedCoord> worldCoords = data.computeIfAbsent(worldName, k -> new ArrayList<>());
+
+            worldCoords.removeIf(c -> c.getName().equalsIgnoreCase(newCoord.getName()));
+            worldCoords.add(newCoord);
 
             File coordsFile = new File("Statify/savedCoords.json");
             if (createParentDirs(coordsFile)) {
                 try (FileWriter writer = new FileWriter(coordsFile, StandardCharsets.UTF_8)) {
                     Common.gson.toJson(data, writer);
-                    Common.LOGGER.info("Saved coordinate '{}' for world '{}'", coordName, worldName);
+                    Common.LOGGER.info("Saved coordinate '{}' for world '{}'", newCoord.getName(), worldName);
                 }
             }
         } catch (IOException e) {
@@ -73,9 +83,10 @@ public class FileManagement {
 
     public static void deleteCoord(String worldName, String coordName) {
         try {
-            Map<String, Map<String, String>> data = loadCoordsFromJson();
+            Map<String, List<SavedCoord>> data = loadCoordsFromJson();
             if (data.containsKey(worldName)) {
-                data.get(worldName).remove(coordName);
+                List<SavedCoord> worldCoords = data.get(worldName);
+                worldCoords.removeIf(c -> c.getName().equalsIgnoreCase(coordName));
 
                 File coordsFile = new File("Statify/savedCoords.json");
                 if (createParentDirs(coordsFile)) {
@@ -90,9 +101,9 @@ public class FileManagement {
         }
     }
 
-    public static Map<String, String> getCoordsForWorld(String worldName) {
-        Map<String, Map<String, String>> data = loadCoordsFromJson();
-        return data.getOrDefault(worldName, new LinkedHashMap<>());
+    public static List<SavedCoord> getCoordsForWorld(String worldName) {
+        Map<String, List<SavedCoord>> data = loadCoordsFromJson();
+        return data.getOrDefault(worldName, new ArrayList<>());
     }
 
     public static void writeStatsToFile(ServerPlayer player, String worldName) {
@@ -289,6 +300,88 @@ public class FileManagement {
                 Common.LOGGER.error("Failed to load Sheet's ID for world: {}", worldName, e);
                 return null;
             }
+        }
+    }
+
+    public static AchievementData loadAchievements(String worldName) {
+        Path path = Paths.get("Statify", worldName, "achievements.json");
+        File file = path.toFile();
+
+        if (!file.exists()) {
+            AchievementData newData = new AchievementData();
+            saveAchievements(worldName, newData);
+            return newData;
+        }
+
+        try (FileReader reader = new FileReader(file, StandardCharsets.UTF_8)) {
+            AchievementData data = Common.gson.fromJson(reader, AchievementData.class);
+            return data != null ? data : new AchievementData();
+        } catch (IOException e) {
+            Common.LOGGER.error("Failed to load achievements.json for world: {}", worldName);
+            return new AchievementData();
+        }
+    }
+
+    public static void saveAchievements(String worldName, AchievementData data) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                Path path = Paths.get("Statify", worldName, "achievements.json");
+                File file = path.toFile();
+
+                if (createParentDirs(file)) {
+                    try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
+                        Common.gson.toJson(data, writer);
+                    }
+                }
+            } catch (IOException e) {
+                Common.LOGGER.error("Failed to save achievements.json for world: {}", worldName, e);
+            }
+        });
+    }
+
+    private static File getFolder(String worldName) {
+        File folder = new File("saves/" + worldName + "/statify");
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        return folder;
+    }
+
+    public static void saveCurrentSession(String worldName, String uuid, SessionData data) {
+        File file = new File(getFolder(worldName), uuid + ".json");
+        saveToFile(file, data);
+    }
+
+    public static SessionData loadCurrentSession(String worldName, String uuid) {
+        File file = new File(getFolder(worldName), uuid + ".json");
+        return loadFromFile(file);
+    }
+
+    public static void saveLastSnapshot(String worldName, String uuid, SessionData data) {
+        File file = new File(getFolder(worldName), uuid + ".last.json");
+        saveToFile(file, data);
+    }
+
+    public static SessionData loadLastSnapshot(String worldName, String uuid) {
+        File file = new File(getFolder(worldName), uuid + ".last.json");
+        return loadFromFile(file);
+    }
+
+    private static void saveToFile(File file, SessionData data) {
+        try (FileWriter writer = new FileWriter(file)) {
+            Common.gson.toJson(data, writer);
+        } catch (IOException e) {
+            Common.LOGGER.error("Hiba a session fájl mentésekor: {}", file.getName(), e);
+        }
+    }
+
+    private static SessionData loadFromFile(File file) {
+        if (!file.exists()) return null;
+        try (FileReader reader = new FileReader(file)) {
+            return GSON.fromJson(reader, SessionData.class);
+        } catch (IOException e) {
+            Common.LOGGER.error("Hiba a session fájl beolvasásakor: {}", file.getName(), e);
+            return null;
         }
     }
 

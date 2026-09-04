@@ -1,8 +1,10 @@
 package dev.soviaat;
 
+import dev.soviaat.achievements.MilestoneManager;
 import dev.soviaat.commands.CommandManagement;
 import dev.soviaat.commands.CountDays;
 import dev.soviaat.commands.SheetId;
+import dev.soviaat.sessiontracker.SessionManager;
 import dev.soviaat.utils.GoogleSheetsUtil;
 import dev.soviaat.utils.UploadManager;
 import java.util.concurrent.CompletableFuture;
@@ -66,23 +68,40 @@ public class Statify implements ModInitializer {
 		ServerTickEvents.END_LEVEL_TICK.register(world -> {
 			String worldName = world.getServer().getWorldData().getLevelName();
 			boolean isUploading = uploadManager.isWorldUploading(worldName);
+
 			if ("on".equals(Common.worldStatusMap.getOrDefault(worldName, "off"))) {
 				long currentTime = Math.abs(world.getGameTime());
+				long currentClockTicks = world.dimensionType().defaultClock()
+					.map(clock -> world.clockManager().getTotalTicks(clock))
+					.orElseGet(() -> {
+						ServerLevel overworld = world.getServer().overworld();
+						return overworld.dimensionType().defaultClock()
+								.map(clock -> overworld.clockManager().getTotalTicks(clock))
+								.orElse(0L);
+					});
+
+				long calculatedDays = currentClockTicks / 24000L;
+
+				if (currentTime % 100L == 0) {
+					for (ServerPlayer player : world.players()) {
+						MilestoneManager.checkDaysOnly(player, worldName, calculatedDays);
+					}
+				}
+
 				if (currentTime - lastUpdateTime >= 2400L) {
 					lastUpdateTime = currentTime;
 
 					for (ServerPlayer player : world.players()) {
+						MilestoneManager.checkAndTriggerMilestones(player, worldName);
 						FileManagement.writeStatsToFile(player, worldName);
 					}
-
-					long currentClockTicks = world.clockManager().getTotalTicks(world.dimensionType().defaultClock().get());
 
 					if (isUploading) {
 						this.uploadToSheetsAsync(worldName, currentClockTicks);
 					}
 
-					if ((long)Common.getDayCount(worldName) < currentClockTicks / 24000L) {
-						Common.putDayCount((int)(currentClockTicks / 24000L));
+					if ((long) Common.getDayCount(worldName) < calculatedDays) {
+						Common.putDayCount((int) calculatedDays);
 						FileManagement.writeDaysToFile(worldName, Common.getDayCountAsString());
 						if (isUploading) {
 							String dayFilePath = "Statify/" + worldName + "/days.csv";
@@ -107,6 +126,16 @@ public class Statify implements ModInitializer {
 			Component startMsg = Component.literal("Statify started");
 			player.sendSystemMessage(startMsg, true);
 
+			long currentClockTicks = player.level().dimensionType().defaultClock()
+					.map(clock -> player.level().clockManager().getTotalTicks(clock))
+					.orElseGet(() -> {
+						ServerLevel overworld = player.level().getServer().overworld();
+						return overworld.dimensionType().defaultClock()
+								.map(clock -> overworld.clockManager().getTotalTicks(clock))
+								.orElse(0L);
+					});
+			long currentDays = currentClockTicks / 24000L;
+
 			if ("on".equals(Common.worldStatusMap.getOrDefault(worldName, "off")) && uploadManager.isWorldUploading(worldName)) {
 				CompletableFuture.runAsync(() -> {
 					String sheetId = FileManagement.loadSheetIdFromJson(worldName);
@@ -118,6 +147,26 @@ public class Statify implements ModInitializer {
 								: "Sheet version does not match, sending warning to the player.");
 					}
 				});
+			}
+
+			SessionManager.onPlayerJoin(player, worldName, currentDays);
+		});
+
+		ServerLifecycleEvents.BEFORE_SAVE.register((server, registryAccess, flush) -> {
+			String worldName = server.getWorldData().getLevelName();
+
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				long currentClockTicks = player.level().dimensionType().defaultClock()
+						.map(clock -> player.level().clockManager().getTotalTicks(clock))
+						.orElseGet(() -> {
+							ServerLevel overworld = server.overworld();
+							return overworld.dimensionType().defaultClock()
+									.map(clock -> overworld.clockManager().getTotalTicks(clock))
+									.orElse(0L);
+						});
+
+				long currentDays = currentClockTicks / 24000L;
+				SessionManager.updateCurrentSession(player, worldName, currentDays);
 			}
 		});
 
@@ -136,6 +185,8 @@ public class Statify implements ModInitializer {
 					}
 				});
 			}
+
+			FileManagement.loadAchievements(worldName);
 		});
 	}
 

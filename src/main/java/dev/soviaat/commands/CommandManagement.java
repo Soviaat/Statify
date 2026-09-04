@@ -40,14 +40,27 @@ public class CommandManagement {
                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                 .then(Commands.argument("y", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer())
-                                                .then(Commands.argument("coord-name", StringArgumentType.greedyString())
+                                                .then(Commands.argument("coord-name", StringArgumentType.string())
+                                                        // Dimenzió NÉLKÜL (Default: overworld)
                                                         .executes(ctx -> CoordCommands.saveCoord(
                                                                 ctx,
                                                                 StringArgumentType.getString(ctx, "coord-name"),
                                                                 IntegerArgumentType.getInteger(ctx, "x"),
                                                                 IntegerArgumentType.getInteger(ctx, "y"),
-                                                                IntegerArgumentType.getInteger(ctx, "z")
+                                                                IntegerArgumentType.getInteger(ctx, "z"),
+                                                                "overworld"
                                                         ))
+                                                        // Dimenzióval MEGADVA
+                                                        .then(Commands.argument("dimension", StringArgumentType.word())
+                                                                .executes(ctx -> CoordCommands.saveCoord(
+                                                                        ctx,
+                                                                        StringArgumentType.getString(ctx, "coord-name"),
+                                                                        IntegerArgumentType.getInteger(ctx, "x"),
+                                                                        IntegerArgumentType.getInteger(ctx, "y"),
+                                                                        IntegerArgumentType.getInteger(ctx, "z"),
+                                                                        StringArgumentType.getString(ctx, "dimension")
+                                                                ))
+                                                        )
                                                 )
                                         )
                                 )
@@ -57,6 +70,17 @@ public class CommandManagement {
         dispatcher.register(
                 Commands.literal("get-coords")
                         .executes(CoordCommands::getCoords)
+        );
+
+        dispatcher.register(
+                Commands.literal("save-coords-here")
+                        .then(Commands.argument("name", StringArgumentType.string())
+                                .executes(ctx -> CoordCommands.saveCoordsHere(
+                                        ctx,
+                                        StringArgumentType.getString(ctx, "name")
+                                )
+                        )
+                )
         );
     }
 
