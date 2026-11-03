@@ -1,6 +1,7 @@
 package dev.soviaat.sessiontracker;
 
 import dev.soviaat.FileManagement;
+import dev.soviaat.utils.WorldSettingsManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -20,61 +21,62 @@ public class SessionManager {
         String uuid = player.getStringUUID();
 
         SessionData lastSnapshot = FileManagement.loadLastSnapshot(worldName, uuid);
-
         SessionData currentState = captureCurrentState(player, currentDays);
 
         if (lastSnapshot != null) {
-            long mobDelta = Math.max(0, currentState.mobsKilled - lastSnapshot.mobsKilled);
-            long dayDelta = Math.max(0, currentState.days - lastSnapshot.days);
+            WorldSettingsManager.WorldSettings settings = WorldSettingsManager.loadSettings(worldName);
 
-            Map<String, Long> blockDeltas = new HashMap<>();
-            long totalBlocksMinedInSession = 0;
+            if (settings.last_session_notifications) {
+                long mobDelta = Math.max(0, currentState.mobsKilled - lastSnapshot.mobsKilled);
+                long dayDelta = Math.max(0, currentState.days - lastSnapshot.days);
 
-            for (Map.Entry<String, Double> entry : currentState.blocksMined.entrySet()) {
-                String blockId = entry.getKey();
-                long currentMined = entry.getValue().longValue();
+                Map<String, Long> blockDeltas = new HashMap<>();
+                long totalBlocksMinedInSession = 0;
 
-                Double lastMinedDouble = lastSnapshot.blocksMined.get(blockId);
-                long lastMined = (lastMinedDouble != null) ? lastMinedDouble.longValue() : 0L;
+                for (Map.Entry<String, Double> entry : currentState.blocksMined.entrySet()) {
+                    String blockId = entry.getKey();
+                    long currentMined = entry.getValue().longValue();
 
-                long diff = currentMined - lastMined;
-                if (diff > 0) {
-                    String blockName = BuiltInRegistries.BLOCK.getOptional(Identifier.parse(blockId))
-                            .map(b -> b.getName().getString())
-                            .orElse(blockId);
+                    Double lastMinedDouble = lastSnapshot.blocksMined.get(blockId);
+                    long lastMined = (lastMinedDouble != null) ? lastMinedDouble.longValue() : 0L;
 
-                    blockDeltas.put(blockName, diff);
-                    totalBlocksMinedInSession += diff;
+                    long diff = currentMined - lastMined;
+                    if (diff > 0) {
+                        String blockName = BuiltInRegistries.BLOCK.getOptional(Identifier.parse(blockId))
+                                .map(b -> b.getName().getString())
+                                .orElse(blockId);
+
+                        blockDeltas.put(blockName, diff);
+                        totalBlocksMinedInSession += diff;
+                    }
+                }
+
+                long soundSeed = player.getRandom().nextLong();
+
+                if (player.connection != null) {
+                    player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BOOK_PAGE_TURN), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 1.0f, soundSeed));
+                    player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BOOK_PAGE_TURN), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 1.0f, soundSeed));
+                    player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BOOK_PAGE_TURN), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 1.05f, soundSeed));
+                }
+
+                player.sendSystemMessage(Component.literal("§b★ §r§lLAST SESSION §r§b★"));
+                player.sendSystemMessage(Component.literal("§7Days passed: §e" + ((dayDelta == 0) ? (dayDelta) : ("+" + dayDelta))));
+                player.sendSystemMessage(Component.literal("§7Mobs killed: §e" + ((mobDelta == 0) ? (String.format("%,d", mobDelta)) : ("+" + String.format("%,d", mobDelta)))));
+                player.sendSystemMessage(Component.literal("§7Total blocks mined: §e" + ((totalBlocksMinedInSession == 0) ? (String.format("%,d", totalBlocksMinedInSession)) : ("+" + String.format("%,d", totalBlocksMinedInSession)))));
+
+                if (!blockDeltas.isEmpty()) {
+                    player.sendSystemMessage(Component.literal("§7Top 3 mined blocks:"));
+                    blockDeltas.entrySet().stream()
+                            .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                            .limit(3)
+                            .forEach(entry -> player.sendSystemMessage(
+                                    Component.literal("  §8• §f" + entry.getKey() + ": §e+" + String.format("%,d", entry.getValue()))
+                            ));
                 }
             }
-
-            long soundSeed = player.getRandom().nextLong();
-
-            if (player.connection != null) {
-                player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BOOK_PAGE_TURN), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 1.0f, soundSeed));
-                player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BOOK_PAGE_TURN), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 1.0f, soundSeed));
-                player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BOOK_PAGE_TURN), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 1.05f, soundSeed));
-            }
-
-            player.sendSystemMessage(Component.literal("§b★ §r§lLAST SESSION §r§b★"));
-            player.sendSystemMessage(Component.literal("§7Days passed: §e" + ((dayDelta == 0) ? (dayDelta) : ("+" + dayDelta))));
-            player.sendSystemMessage(Component.literal("§7Mobs killed: §e" + ((mobDelta == 0) ? (String.format("%,d", mobDelta)) : ("+" + String.format("%,d", mobDelta)))));
-            player.sendSystemMessage(Component.literal("§7Total blocks mined: §e" + ((totalBlocksMinedInSession == 0) ? (String.format("%,d", totalBlocksMinedInSession)) : ("+" + String.format("%,d", totalBlocksMinedInSession)))));
-
-            if (!blockDeltas.isEmpty()) {
-                player.sendSystemMessage(Component.literal("§7Top 3 mined blocks:"));
-                blockDeltas.entrySet().stream()
-                        .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
-                        .limit(3)
-                        .forEach(entry -> player.sendSystemMessage(
-                                Component.literal("  §8• §f" + entry.getKey() + ": §e+" + String.format("%,d", entry.getValue()))
-                        ));
-            }
-
         }
 
         FileManagement.saveLastSnapshot(worldName, uuid, currentState);
-
         FileManagement.saveCurrentSession(worldName, uuid, currentState);
     }
 

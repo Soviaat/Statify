@@ -5,11 +5,14 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +70,7 @@ public class HelpScreen extends Screen {
         this.titleWidget.setPosition(this.leftPos + 12, this.topPos + 6);
 
         this.tutorialButton = Button.builder(Component.literal("§d[Tutorial]"), button -> {
-            getPlatform().openUri("https://github.com/Soviaat/Statify#setup");
+            ConfirmLinkScreen.confirmLinkNow(this, URI.create("https://github.com/Soviaat/Statify#setup"));
         }).bounds(this.leftPos + 260, this.topPos, 75, 16).build();
         this.tutorialButton.setTooltip(Tooltip.create(Component.literal("Opens a link to Statify tutorial.")));
 

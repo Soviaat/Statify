@@ -1,6 +1,7 @@
 package dev.soviaat.achievements;
 
 import dev.soviaat.FileManagement;
+import dev.soviaat.utils.WorldSettingsManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +26,7 @@ public class MilestoneManager {
 
         if (data.days.current != currentDays) {
             data.days.current = currentDays;
-            if (checkGroup(data.days, player, "You've reached %d days!")) {
+            if (checkGroup(data.days, player, "You've reached %d days!", worldName)) {
                 FileManagement.saveAchievements(worldName, data);
             }
         }
@@ -37,7 +38,7 @@ public class MilestoneManager {
 
         long mobsKilled = player.getStats().getValue(Stats.CUSTOM.get(Stats.MOB_KILLS));
         data.mobsKilled.current = mobsKilled;
-        if (checkGroup(data.mobsKilled, player, "You've killed %,d mobs!")) {
+        if (checkGroup(data.mobsKilled, player, "You've killed %,d mobs!", worldName)) {
             changed = true;
         }
 
@@ -53,7 +54,7 @@ public class MilestoneManager {
 
                 group.current = mined;
                 String blockName = block.getName().getString();
-                if (checkGroup(group, player, "You've mined %,d " + blockName + "!")) {
+                if (checkGroup(group, player, "You've mined %,d " + blockName + "!", worldName)) {
                     changed = true;
                 }
             }
@@ -64,7 +65,7 @@ public class MilestoneManager {
         }
     }
 
-    private static boolean checkGroup(MilestoneGroup group, ServerPlayer player, String messageFormat) {
+    private static boolean checkGroup(MilestoneGroup group, ServerPlayer player, String messageFormat, String worldName) {
         boolean updated = false;
 
         for (long milestone : group.milestones) {
@@ -72,13 +73,17 @@ public class MilestoneManager {
                 group.lastUnlocked = milestone;
                 updated = true;
 
-                String formatted = String.format(messageFormat, milestone);
+                WorldSettingsManager.WorldSettings settings = WorldSettingsManager.loadSettings(worldName);
 
-                Component message = Component.literal("§6★ §r§lMilestone Reached: §r§o§e" + formatted);
-                sendActionBarForDuration(player, message, 10);
-                player.level().playSound(
-                        null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0f, 1.0f
-                );
+                if (settings.milestones) {
+                    String formatted = String.format(messageFormat, milestone);
+
+                    Component message = Component.literal("§6★ §r§lMilestone Reached: §r§o§e" + formatted);
+                    sendActionBarForDuration(player, message, 10);
+                    player.level().playSound(
+                            null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0f, 1.0f
+                    );
+                }
             }
         }
 

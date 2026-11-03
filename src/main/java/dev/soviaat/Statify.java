@@ -5,6 +5,7 @@ import dev.soviaat.commands.CommandManagement;
 import dev.soviaat.commands.CountDays;
 import dev.soviaat.commands.SheetId;
 import dev.soviaat.sessiontracker.SessionManager;
+import dev.soviaat.utils.ClockUtil;
 import dev.soviaat.utils.GoogleSheetsUtil;
 import dev.soviaat.utils.UploadManager;
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +18,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.clock.ServerClockManager;
 
 public class Statify implements ModInitializer {
 	private static UploadManager uploadManager;
@@ -42,27 +44,35 @@ public class Statify implements ModInitializer {
 
 			if ("on".equals(Common.worldStatusMap.getOrDefault(worldName, "off"))) {
 				for (ServerLevel world : server.getAllLevels()) {
-					long worldTime = world.dimensionType().defaultClock()
-							.map(clock -> world.clockManager().getTotalTicks(clock))
-							.orElseGet(() -> {
-								return server.overworld().dimensionType().defaultClock()
-										.map(c -> server.overworld().clockManager().getTotalTicks(c))
-										.orElse(0L);
-							});
+					long worldTime = ClockUtil.getTotalTicks(world);
 
 					for (ServerPlayer player : world.players()) {
-						CompletableFuture.runAsync(() -> {
+						try {
 							FileManagement.writeStatsToFile(player, worldName);
 							Common.LOGGER.info("Uploading stats since player is leaving the world.");
 							if (uploadManager.isWorldUploading(worldName)) {
 								String csvFilePath = "Statify/" + worldName + "/statify_stats.csv";
-								GoogleSheetsUtil.updateStatsFromCSV(csvFilePath, "Raw_Data!A1", worldName);
-								this.uploadToSheetsAsync(worldName, worldTime);
+
+								GoogleSheetsUtil.updateStatsFromCSVSync(csvFilePath, "Raw_Data!A1", worldName);
+
+								String dayFilePath = "Statify/" + worldName + "/days.csv";
+								if ((long) Common.getDayCount(worldName) < worldTime / 24000L) {
+									Common.putDayCount((int) (worldTime / 24000L));
+									FileManagement.writeDaysToFile(worldName, Common.getDayCountAsString());
+
+									GoogleSheetsUtil.updateStatsFromCSVSync(dayFilePath, "Raw_Data!I3", worldName);
+								}
 							}
-						});
+						} catch (Exception e) {
+							Common.LOGGER.error("Failed to execute shutdown upload for player: {}", player.getName().getString(), e);
+						}
 					}
 				}
 			}
+		});
+
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			GoogleSheetsUtil.shutdown();
 		});
 
 		ServerTickEvents.END_LEVEL_TICK.register(world -> {
@@ -71,14 +81,7 @@ public class Statify implements ModInitializer {
 
 			if ("on".equals(Common.worldStatusMap.getOrDefault(worldName, "off"))) {
 				long currentTime = Math.abs(world.getGameTime());
-				long currentClockTicks = world.dimensionType().defaultClock()
-					.map(clock -> world.clockManager().getTotalTicks(clock))
-					.orElseGet(() -> {
-						ServerLevel overworld = world.getServer().overworld();
-						return overworld.dimensionType().defaultClock()
-								.map(clock -> overworld.clockManager().getTotalTicks(clock))
-								.orElse(0L);
-					});
+				long currentClockTicks = ClockUtil.getTotalTicks(world);
 
 				long calculatedDays = currentClockTicks / 24000L;
 
@@ -126,14 +129,7 @@ public class Statify implements ModInitializer {
 			Component startMsg = Component.literal("Statify started");
 			player.sendSystemMessage(startMsg, true);
 
-			long currentClockTicks = player.level().dimensionType().defaultClock()
-					.map(clock -> player.level().clockManager().getTotalTicks(clock))
-					.orElseGet(() -> {
-						ServerLevel overworld = player.level().getServer().overworld();
-						return overworld.dimensionType().defaultClock()
-								.map(clock -> overworld.clockManager().getTotalTicks(clock))
-								.orElse(0L);
-					});
+			long currentClockTicks = ClockUtil.getTotalTicks(player.level());
 			long currentDays = currentClockTicks / 24000L;
 
 			if ("on".equals(Common.worldStatusMap.getOrDefault(worldName, "off")) && uploadManager.isWorldUploading(worldName)) {
@@ -156,14 +152,7 @@ public class Statify implements ModInitializer {
 			String worldName = server.getWorldData().getLevelName();
 
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-				long currentClockTicks = player.level().dimensionType().defaultClock()
-						.map(clock -> player.level().clockManager().getTotalTicks(clock))
-						.orElseGet(() -> {
-							ServerLevel overworld = server.overworld();
-							return overworld.dimensionType().defaultClock()
-									.map(clock -> overworld.clockManager().getTotalTicks(clock))
-									.orElse(0L);
-						});
+				long currentClockTicks = ClockUtil.getTotalTicks(player.level());
 
 				long currentDays = currentClockTicks / 24000L;
 				SessionManager.updateCurrentSession(player, worldName, currentDays);
